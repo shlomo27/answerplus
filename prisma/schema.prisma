@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Question {
+  id         String      @id @default(cuid())
+  text       String
+  category   String
+  isPublic   Boolean     @default(true)
+  authorName String      @default("אנונימי")
+  createdAt  DateTime    @default(now())
+  responses  AIResponse[]
+  summary    Summary?
+  comments   Comment[]
+}
+
+model AIResponse {
+  id         String   @id @default(cuid())
+  questionId String
+  provider   String
+  content    String
+  error      Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model Summary {
+  id         String   @id @default(cuid())
+  questionId String   @unique
+  content    String
+  conclusion String
+  createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  questionId String
+  authorName String
+  content    String
+  createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
