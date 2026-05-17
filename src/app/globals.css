@@ -4,9 +4,24 @@
 
 * {
   direction: rtl;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   background-color: #f8fafc;
+  min-height: 100dvh;
+}
+
+/* Smooth scrolling category filter */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

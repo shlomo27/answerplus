@@ -25,7 +25,6 @@ export default function CommentSection({ questionId, initialComments }: Props) {
     if (!text.trim()) return;
     setLoading(true);
     setError("");
-
     try {
       const res = await fetch(`/api/questions/${questionId}/comments`, {
         method: "POST",
@@ -45,21 +44,21 @@ export default function CommentSection({ questionId, initialComments }: Props) {
 
   return (
     <div>
-      <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+      <h3 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
         <span>💬</span>
         <span>תגובות ({comments.length})</span>
       </h3>
 
-      <div className="space-y-3 mb-6">
+      <div className="space-y-3 mb-5">
         {comments.length === 0 && (
-          <p className="text-gray-400 text-sm text-center py-4">
+          <p className="text-gray-400 text-sm text-center py-6">
             אין תגובות עדיין. היה הראשון!
           </p>
         )}
         {comments.map((c) => (
-          <div key={c.id} className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600">
+          <div key={c.id} className="bg-gray-50 border border-gray-200 rounded-xl p-3.5">
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
                 {c.authorName.charAt(0)}
               </div>
               <span className="text-sm font-medium text-gray-700">{c.authorName}</span>
@@ -72,28 +71,29 @@ export default function CommentSection({ questionId, initialComments }: Props) {
         ))}
       </div>
 
-      <form onSubmit={submitComment} className="bg-white border border-gray-200 rounded-xl p-4">
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">הוסף תגובה</h4>
+      <form onSubmit={submitComment} className="space-y-2.5">
         <input
           type="text"
           placeholder="שמך (אופציונלי)"
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-indigo-300"
+          disabled={loading}
         />
         <textarea
           placeholder="כתוב תגובה..."
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={3}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"
+          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none leading-relaxed"
           required
+          disabled={loading}
         />
-        {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
         <button
           type="submit"
           disabled={loading || !text.trim()}
-          className="bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold text-base hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 transition-colors"
         >
           {loading ? "שולח..." : "שלח תגובה"}
         </button>
