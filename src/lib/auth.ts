@@ -71,10 +71,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.email = user.email;
       }
       if (!token.id && token.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email as string },
-        });
-        if (dbUser) token.id = dbUser.id;
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: token.email as string },
+          });
+          if (dbUser) token.id = dbUser.id;
+        } catch {
+          // ignore DB errors in JWT callback
+        }
       }
       return token;
     },
