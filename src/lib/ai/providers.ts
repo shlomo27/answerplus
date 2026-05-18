@@ -1,4 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
@@ -10,18 +9,26 @@ export interface ProviderResult {
 
 async function queryClaude(question: string): Promise<ProviderResult> {
   try {
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    const message = await client.messages.create({
-      model: "claude-3-haiku-20240307",
-      max_tokens: 1024,
-      messages: [{ role: "user", content: question }],
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": process.env.ANTHROPIC_API_KEY ?? "",
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-3-haiku-20240307",
+        max_tokens: 1024,
+        messages: [{ role: "user", content: question }],
+      }),
     });
-    const content = message.content[0];
-    return {
-      provider: "claude",
-      content: content.type === "text" ? content.text : "",
-      error: false,
-    };
+    if (!res.ok) {
+      const err = await res.text();
+      return { provider: "claude", content: `שגיאה ${res.status}: ${err}`, error: true };
+    }
+    const data = await res.json();
+    const text = data.content?.[0]?.text ?? "";
+    return { provider: "claude", content: text, error: false };
   } catch (e) {
     return { provider: "claude", content: `שגיאה: ${(e as Error).message}`, error: true };
   }
@@ -48,7 +55,7 @@ async function queryChatGPT(question: string): Promise<ProviderResult> {
 async function queryGemini(question: string): Promise<ProviderResult> {
   try {
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY ?? "");
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const result = await model.generateContent(question);
     return {
       provider: "gemini",
