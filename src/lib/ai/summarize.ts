@@ -1,4 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
 import type { ProviderResult } from "./providers";
 
 export interface SummaryResult {
@@ -11,8 +10,6 @@ export async function generateSummary(
   responses: ProviderResult[]
 ): Promise<SummaryResult> {
   try {
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
     const validResponses = responses.filter((r) => !r.error);
     if (validResponses.length === 0) {
       return { content: "לא התקבלו תשובות מה-AI.", conclusion: "לא ניתן לסכם." };
@@ -38,13 +35,26 @@ ${responsesText}
   "conclusion": "המסקנה כאן"
 }`;
 
-    const message = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024,
-      messages: [{ role: "user", content: prompt }],
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": process.env.ANTHROPIC_API_KEY ?? "",
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 1024,
+        messages: [{ role: "user", content: prompt }],
+      }),
     });
 
-    const text = message.content[0].type === "text" ? message.content[0].text : "";
+    if (!res.ok) {
+      return { content: "שגיאה ביצירת הסיכום.", conclusion: "לא ניתן לסכם." };
+    }
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text ?? "";
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
