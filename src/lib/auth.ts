@@ -9,14 +9,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   debug: true,
   logger: {
-    error(code, ...message) {
-      console.error("[AUTH ERROR]", code, ...message);
+    error(error: Error & { cause?: unknown }) {
+      const serialize = (obj: unknown, depth = 0): unknown => {
+        if (depth > 3) return String(obj);
+        if (obj instanceof Error) {
+          return { name: obj.name, message: obj.message, cause: serialize(obj.cause, depth + 1) };
+        }
+        if (obj && typeof obj === "object") {
+          return Object.fromEntries(
+            Object.entries(obj as Record<string, unknown>).map(([k, v]) => [k, serialize(v, depth + 1)])
+          );
+        }
+        return obj;
+      };
+      console.error("[AUTH ERROR FULL]", JSON.stringify(serialize(error), null, 2));
     },
-    warn(code) {
+    warn(code: string) {
       console.warn("[AUTH WARN]", code);
     },
-    debug(code, ...message) {
-      console.log("[AUTH DEBUG]", code, ...message);
+    debug(code: string, metadata?: unknown) {
+      if (code === "callback route error details") {
+        console.log("[AUTH DEBUG]", code, JSON.stringify(metadata, (_, v) => {
+          if (v instanceof Error) return { name: v.name, message: v.message, cause: String((v as Error & { cause?: unknown }).cause) };
+          return v;
+        }, 2));
+      }
     },
   },
   session: { strategy: "jwt" },
