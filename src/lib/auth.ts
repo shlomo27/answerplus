@@ -7,6 +7,18 @@ import { prisma } from "@/lib/prisma";
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   trustHost: true,
+  debug: true,
+  logger: {
+    error(code, ...message) {
+      console.error("[AUTH ERROR]", code, ...message);
+    },
+    warn(code) {
+      console.warn("[AUTH WARN]", code);
+    },
+    debug(code, ...message) {
+      console.log("[AUTH DEBUG]", code, ...message);
+    },
+  },
   session: { strategy: "jwt" },
   pages: { signIn: "/auth/login" },
   providers: [
