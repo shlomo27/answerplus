@@ -9,24 +9,27 @@ export default function Navbar() {
   const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // On the landing page, show a minimal transparent navbar (landing page has its own nav)
+  if (pathname === "/") return null;
+
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-1.5 font-bold text-lg text-indigo-700">
+        <Link href={session?.user ? "/feed" : "/"} className="flex items-center gap-1.5 font-bold text-lg text-indigo-700">
           <span className="text-xl">✦</span>
-          <span>AnswerPlus</span>
+          <span>Qrowd</span>
         </Link>
 
         <div className="flex items-center gap-2">
           <Link
-            href="/"
+            href="/feed"
             className={`hidden sm:block text-sm px-3 py-1.5 rounded-lg transition-colors ${
-              pathname === "/"
+              pathname === "/feed"
                 ? "bg-indigo-50 text-indigo-700 font-medium"
                 : "text-gray-600 hover:text-indigo-700"
             }`}
           >
-            פיד ציבורי
+            פיד
           </Link>
 
           {status === "loading" ? null : session?.user ? (

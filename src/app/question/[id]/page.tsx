@@ -33,7 +33,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
   return (
     <div className="max-w-3xl mx-auto pb-10">
       <Link
-        href="/"
+        href="/feed"
         className="inline-flex items-center gap-1 text-sm text-indigo-600 mb-4 py-1"
       >
         ← חזור לפיד

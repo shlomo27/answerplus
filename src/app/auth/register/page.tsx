@@ -48,7 +48,7 @@ export default function RegisterPage() {
 
   async function handleGoogle() {
     setGoogleLoading(true);
-    await signIn("google", { callbackUrl: "/" });
+    await signIn("google", { callbackUrl: "/feed" });
   }
 
   return (
@@ -57,10 +57,10 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-1.5 font-bold text-xl text-indigo-700 mb-4">
             <span>✦</span>
-            <span>AnswerPlus</span>
+            <span>Qrowd</span>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">יצירת חשבון חדש</h1>
-          <p className="text-gray-500 text-sm mt-1">הצטרף לקהילת AnswerPlus</p>
+          <p className="text-gray-500 text-sm mt-1">הצטרף לקהילת Qrowd</p>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">

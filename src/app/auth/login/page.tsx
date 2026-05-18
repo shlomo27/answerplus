@@ -8,7 +8,7 @@ import { Suspense } from "react";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || "/feed";
   const verified = searchParams.get("verified");
   const errorParam = searchParams.get("error");
   const [email, setEmail] = useState("");
@@ -55,7 +55,7 @@ function LoginForm() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-1.5 font-bold text-xl text-indigo-700 mb-4">
             <span>✦</span>
-            <span>AnswerPlus</span>
+            <span>Qrowd</span>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">התחבר לחשבון</h1>
           <p className="text-gray-500 text-sm mt-1">ברוך הבא חזרה</p>

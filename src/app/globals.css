@@ -25,3 +25,22 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Network visualization animations */
+@keyframes network-pulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+.network-line {
+  animation: network-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes node-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.animate-pulse-slow {
+  animation: node-pulse 2.5s ease-in-out infinite;
+}

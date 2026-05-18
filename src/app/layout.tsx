@@ -4,8 +4,8 @@ import Navbar from "@/components/Navbar";
 import SessionProvider from "@/components/SessionProvider";
 
 export const metadata: Metadata = {
-  title: "AnswerPlus – השוואת AI",
-  description: "שאל שאלה וקבל תשובות מ-Claude, ChatGPT וGemini בבת אחת",
+  title: "Qrowd – שאל AI וקהילה",
+  description: "שאל AI וקהילה - קבל את התשובה הטובה ביותר",
 };
 
 export const viewport: Viewport = {
