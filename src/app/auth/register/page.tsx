@@ -3,7 +3,8 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-// signIn is kept for Google OAuth
+import { useLangContext } from "@/components/LangProvider";
+import { getTranslations } from "@/lib/i18n";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,13 +14,16 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+  const { lang } = useLangContext();
+  const t = getTranslations(lang).register;
+  const isRTL = lang === "he";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
     if (password.length < 6) {
-      setError("הסיסמה חייבת להכיל לפחות 6 תווים");
+      setError(t.errorPasswordLength);
       return;
     }
 
@@ -33,14 +37,14 @@ export default function RegisterPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "שגיאה בהרשמה");
+        setError(data.error || t.errorGeneral);
         return;
       }
 
       // Redirect to check-email page (email verification required)
       router.push(`/auth/check-email?email=${encodeURIComponent(email)}`);
     } catch {
-      setError("שגיאה בהרשמה, נסה שוב");
+      setError(t.errorGeneral);
     } finally {
       setLoading(false);
     }
@@ -52,15 +56,15 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
+    <div className="min-h-[80vh] flex items-center justify-center px-4" dir={isRTL ? "rtl" : "ltr"}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-1.5 font-bold text-xl text-indigo-700 mb-4">
             <span>✦</span>
             <span>Qrowd</span>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">יצירת חשבון חדש</h1>
-          <p className="text-gray-500 text-sm mt-1">הצטרף לקהילת Qrowd</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t.title}</h1>
+          <p className="text-gray-500 text-sm mt-1">{t.subtitle}</p>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
@@ -83,12 +87,12 @@ export default function RegisterPage() {
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
             )}
-            הירשם עם Google
+            {t.signUpGoogle}
           </button>
 
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400">או</span>
+            <span className="text-xs text-gray-400">{t.or}</span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
@@ -96,13 +100,13 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                שם מלא
+                {t.nameLabel}
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="השם שלך"
+                placeholder={t.namePlaceholder}
                 required
                 disabled={loading}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:opacity-50"
@@ -111,7 +115,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                כתובת אימייל
+                {t.emailLabel}
               </label>
               <input
                 type="email"
@@ -127,13 +131,13 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                סיסמה
+                {t.passwordLabel}
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="לפחות 6 תווים"
+                placeholder={t.passwordPlaceholder}
                 required
                 minLength={6}
                 disabled={loading}
@@ -158,19 +162,19 @@ export default function RegisterPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                   </svg>
-                  נרשם...
+                  {t.submittingBtn}
                 </span>
               ) : (
-                "צור חשבון"
+                t.submitBtn
               )}
             </button>
           </form>
         </div>
 
         <p className="text-center text-sm text-gray-500 mt-4">
-          כבר יש לך חשבון?{" "}
+          {t.hasAccount}{" "}
           <Link href="/auth/login" className="text-indigo-600 font-semibold hover:underline">
-            התחבר כאן
+            {t.loginLink}
           </Link>
         </p>
       </div>

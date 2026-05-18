@@ -4,6 +4,8 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
+import { useLangContext } from "@/components/LangProvider";
+import { getTranslations } from "@/lib/i18n";
 
 function LoginForm() {
   const router = useRouter();
@@ -16,6 +18,9 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+  const { lang } = useLangContext();
+  const t = getTranslations(lang).login;
+  const isRTL = lang === "he";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,16 +34,16 @@ function LoginForm() {
       });
       if (result?.error) {
         if (result.error === "EmailNotVerified") {
-          setError("יש לאמת את כתובת המייל לפני ההתחברות");
+          setError(t.emailNotVerified);
         } else {
-          setError("כתובת אימייל או סיסמה שגויים");
+          setError(t.errorCredentials);
         }
       } else {
         router.push(callbackUrl);
         router.refresh();
       }
     } catch {
-      setError("שגיאה בהתחברות, נסה שוב");
+      setError(t.errorGeneral);
     } finally {
       setLoading(false);
     }
@@ -50,25 +55,25 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
+    <div className="min-h-[80vh] flex items-center justify-center px-4" dir={isRTL ? "rtl" : "ltr"}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-1.5 font-bold text-xl text-indigo-700 mb-4">
             <span>✦</span>
             <span>Qrowd</span>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">התחבר לחשבון</h1>
-          <p className="text-gray-500 text-sm mt-1">ברוך הבא חזרה</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t.title}</h1>
+          <p className="text-gray-500 text-sm mt-1">{t.welcome}</p>
         </div>
 
         {verified === "1" && (
           <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4">
-            <p className="text-green-700 text-sm font-medium">האימייל אושר בהצלחה! כעת תוכל להתחבר</p>
+            <p className="text-green-700 text-sm font-medium">{t.emailVerified}</p>
           </div>
         )}
         {errorParam === "EmailNotVerified" && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
-            <p className="text-amber-700 text-sm font-medium">יש לאמת את כתובת המייל לפני ההתחברות</p>
+            <p className="text-amber-700 text-sm font-medium">{t.emailNotVerified}</p>
           </div>
         )}
 
@@ -92,12 +97,12 @@ function LoginForm() {
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
             )}
-            התחבר עם Google
+            {t.signInGoogle}
           </button>
 
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400">או</span>
+            <span className="text-xs text-gray-400">{t.or}</span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
@@ -105,7 +110,7 @@ function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                כתובת אימייל
+                {t.emailLabel}
               </label>
               <input
                 type="email"
@@ -121,13 +126,13 @@ function LoginForm() {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                סיסמה
+                {t.passwordLabel}
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="הסיסמה שלך"
+                placeholder={t.passwordPlaceholder}
                 required
                 disabled={loading}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:opacity-50"
@@ -151,19 +156,19 @@ function LoginForm() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                   </svg>
-                  מתחבר...
+                  {t.submittingBtn}
                 </span>
               ) : (
-                "התחבר"
+                t.submitBtn
               )}
             </button>
           </form>
         </div>
 
         <p className="text-center text-sm text-gray-500 mt-4">
-          אין לך חשבון?{" "}
+          {t.noAccount}{" "}
           <Link href="/auth/register" className="text-indigo-600 font-semibold hover:underline">
-            הירשם כאן
+            {t.registerLink}
           </Link>
         </p>
       </div>
@@ -173,7 +178,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-[80vh] flex items-center justify-center"><p className="text-gray-400">טוען...</p></div>}>
+    <Suspense fallback={<div className="min-h-[80vh] flex items-center justify-center"><p className="text-gray-400">...</p></div>}>
       <LoginForm />
     </Suspense>
   );

@@ -3,11 +3,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
+import { useLangContext } from "@/components/LangProvider";
+import { getTranslations } from "@/lib/i18n";
 
 export default function Navbar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { lang, setLang } = useLangContext();
+  const t = getTranslations(lang).nav;
 
   // On the landing page, show a minimal transparent navbar (landing page has its own nav)
   if (pathname === "/") return null;
@@ -29,8 +33,17 @@ export default function Navbar() {
                 : "text-gray-600 hover:text-indigo-700"
             }`}
           >
-            פיד
+            {t.feed}
           </Link>
+
+          {/* Language toggle */}
+          <button
+            onClick={() => setLang(lang === "he" ? "en" : "he")}
+            className="text-sm px-2 py-1 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors text-gray-600 hover:text-indigo-700 font-medium"
+            title={lang === "he" ? "Switch to English" : "עבור לעברית"}
+          >
+            {lang === "he" ? "🇺🇸" : "🇮🇱"}
+          </button>
 
           {status === "loading" ? null : session?.user ? (
             <>
@@ -38,7 +51,7 @@ export default function Navbar() {
                 href="/ask"
                 className="text-sm px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 active:bg-indigo-800 transition-colors font-semibold"
               >
-                + שאל שאלה
+                {t.askQuestion}
               </Link>
               {/* User menu */}
               <div className="relative">
@@ -69,7 +82,7 @@ export default function Navbar() {
                     />
                     <div className="absolute left-0 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-20 py-1">
                       <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-xs text-gray-400">מחובר כ</p>
+                        <p className="text-xs text-gray-400">{t.connectedAs}</p>
                         <p className="text-sm font-semibold text-gray-700 truncate">
                           {session.user.name || session.user.email}
                         </p>
@@ -81,7 +94,7 @@ export default function Navbar() {
                         }}
                         className="w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
-                        התנתק
+                        {t.signOut}
                       </button>
                     </div>
                   </>
@@ -94,13 +107,13 @@ export default function Navbar() {
                 href="/auth/login"
                 className="text-sm px-3 py-1.5 text-gray-600 hover:text-indigo-700 rounded-lg transition-colors"
               >
-                התחבר
+                {t.signIn}
               </Link>
               <Link
                 href="/ask"
                 className="text-sm px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 active:bg-indigo-800 transition-colors font-semibold"
               >
-                + שאל שאלה
+                {t.askQuestion}
               </Link>
             </>
           )}
