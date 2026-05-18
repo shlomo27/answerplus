@@ -1,14 +1,39 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function AskPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [text, setText] = useState("");
-  const [authorName, setAuthorName] = useState("");
   const [isPublic, setIsPublic] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/login?callbackUrl=/ask");
+    }
+  }, [status, router]);
+
+  // Show loading while checking auth
+  if (status === "loading" || status === "unauthenticated") {
+    return (
+      <div className="max-w-2xl mx-auto pb-10 flex items-center justify-center py-20">
+        <div className="text-center">
+          <svg className="animate-spin h-8 w-8 text-indigo-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+          </svg>
+          <p className="text-gray-400 text-sm">טוען...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const authorName = session?.user?.name || session?.user?.email || "אנונימי";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -22,7 +47,7 @@ export default function AskPage() {
       const res = await fetch("/api/questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, isPublic, authorName: authorName || "אנונימי" }),
+        body: JSON.stringify({ text, isPublic, authorName }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -73,19 +98,15 @@ export default function AskPage() {
           </p>
         </div>
 
-        {/* Author */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            שמך (אופציונלי)
-          </label>
-          <input
-            type="text"
-            value={authorName}
-            onChange={(e) => setAuthorName(e.target.value)}
-            placeholder="אנונימי"
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            disabled={loading}
-          />
+        {/* Author (read-only from session) */}
+        <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+          <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+            {authorName.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">השאלה תפורסם בשם</p>
+            <p className="text-sm font-semibold text-gray-700">{authorName}</p>
+          </div>
         </div>
 
         {/* Public toggle */}
