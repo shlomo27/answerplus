@@ -3,6 +3,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+// signIn is kept for Google OAuth
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -36,20 +37,8 @@ export default function RegisterPage() {
         return;
       }
 
-      // Auto-login after register
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError("נרשמת בהצלחה! אנא התחבר");
-        router.push("/auth/login");
-      } else {
-        router.push("/");
-        router.refresh();
-      }
+      // Redirect to check-email page (email verification required)
+      router.push(`/auth/check-email?email=${encodeURIComponent(email)}`);
     } catch {
       setError("שגיאה בהרשמה, נסה שוב");
     } finally {

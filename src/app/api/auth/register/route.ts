@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
+import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,11 +40,37 @@ export async function POST(request: NextRequest) {
         name,
         email,
         password: hashedPassword,
+        emailVerified: null,
       },
     });
 
+    // Create verification token (expires in 24 hours)
+    const token = randomUUID();
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await prisma.verificationToken.create({
+      data: {
+        identifier: email,
+        token,
+        expires,
+      },
+    });
+
+    // Send verification email
+    try {
+      await sendVerificationEmail(email, token, name);
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+      // Don't fail registration if email fails; user can request resend later
+    }
+
     return NextResponse.json(
-      { id: user.id, name: user.name, email: user.email },
+      {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        message: "נרשמת בהצלחה! בדוק את תיבת הדואר שלך לאימות הכתובת",
+      },
       { status: 201 }
     );
   } catch (error) {

@@ -9,6 +9,8 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const verified = searchParams.get("verified");
+  const errorParam = searchParams.get("error");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,11 @@ function LoginForm() {
         redirect: false,
       });
       if (result?.error) {
-        setError("כתובת אימייל או סיסמה שגויים");
+        if (result.error === "EmailNotVerified") {
+          setError("יש לאמת את כתובת המייל לפני ההתחברות");
+        } else {
+          setError("כתובת אימייל או סיסמה שגויים");
+        }
       } else {
         router.push(callbackUrl);
         router.refresh();
@@ -54,6 +60,17 @@ function LoginForm() {
           <h1 className="text-2xl font-bold text-gray-900">התחבר לחשבון</h1>
           <p className="text-gray-500 text-sm mt-1">ברוך הבא חזרה</p>
         </div>
+
+        {verified === "1" && (
+          <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4">
+            <p className="text-green-700 text-sm font-medium">האימייל אושר בהצלחה! כעת תוכל להתחבר</p>
+          </div>
+        )}
+        {errorParam === "EmailNotVerified" && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
+            <p className="text-amber-700 text-sm font-medium">יש לאמת את כתובת המייל לפני ההתחברות</p>
+          </div>
+        )}
 
         <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
           {/* Google Sign In */}
