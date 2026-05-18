@@ -1,5 +1,4 @@
 import OpenAI from "openai";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export interface ProviderResult {
   provider: "claude" | "chatgpt" | "gemini";
@@ -17,7 +16,7 @@ async function queryClaude(question: string): Promise<ProviderResult> {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-3-haiku-20240307",
+        model: "claude-3-5-haiku-20241022",
         max_tokens: 1024,
         messages: [{ role: "user", content: question }],
       }),
@@ -54,14 +53,22 @@ async function queryChatGPT(question: string): Promise<ProviderResult> {
 
 async function queryGemini(question: string): Promise<ProviderResult> {
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY ?? "");
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent(question);
-    return {
-      provider: "gemini",
-      content: result.response.text(),
-      error: false,
-    };
+    const apiKey = process.env.GOOGLE_AI_API_KEY ?? "";
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: question }] }] }),
+      }
+    );
+    if (!res.ok) {
+      const err = await res.text();
+      return { provider: "gemini", content: `שגיאה ${res.status}: ${err}`, error: true };
+    }
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    return { provider: "gemini", content: text, error: false };
   } catch (e) {
     return { provider: "gemini", content: `שגיאה: ${(e as Error).message}`, error: true };
   }
