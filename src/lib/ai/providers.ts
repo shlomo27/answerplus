@@ -12,7 +12,7 @@ async function queryClaude(question: string): Promise<ProviderResult> {
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const message = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: "claude-3-haiku-20240307",
       max_tokens: 1024,
       messages: [{ role: "user", content: question }],
     });
@@ -48,7 +48,7 @@ async function queryChatGPT(question: string): Promise<ProviderResult> {
 async function queryGemini(question: string): Promise<ProviderResult> {
   try {
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY ?? "");
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1" });
     const result = await model.generateContent(question);
     return {
       provider: "gemini",

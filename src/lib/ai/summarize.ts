@@ -39,7 +39,7 @@ ${responsesText}
 }`;
 
     const message = await client.messages.create({
-      model: "claude-sonnet-4-6",
+      model: "claude-3-haiku-20240307",
       max_tokens: 1024,
       messages: [{ role: "user", content: prompt }],
     });
