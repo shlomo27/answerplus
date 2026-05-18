@@ -12,7 +12,7 @@ export async function categorizeQuestion(question: string): Promise<Category> {
 ענה בקטגוריה בלבד, בלי הסברים נוספים. לדוגמה: "טכנולוגיה"`;
 
     const message = await client.messages.create({
-      model: "claude-3-haiku-20240307",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 20,
       messages: [{ role: "user", content: prompt }],
     });

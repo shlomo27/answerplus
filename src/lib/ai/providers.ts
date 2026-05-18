@@ -16,7 +16,7 @@ async function queryClaude(question: string): Promise<ProviderResult> {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-3-5-haiku-20241022",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 1024,
         messages: [{ role: "user", content: question }],
       }),
@@ -55,7 +55,7 @@ async function queryGemini(question: string): Promise<ProviderResult> {
   try {
     const apiKey = process.env.GOOGLE_AI_API_KEY ?? "";
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "content-type": "application/json" },
