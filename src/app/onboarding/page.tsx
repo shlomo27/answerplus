@@ -45,7 +45,13 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/auth/login");
-    if (status === "authenticated" && session?.user?.onboarded) router.push("/feed");
+    if (status === "authenticated") {
+      // Check DB directly — session may be stale across devices
+      fetch("/api/user/me")
+        .then((r) => r.json())
+        .then((data) => { if (data.onboarded) router.push("/feed"); })
+        .catch(() => { if (session?.user?.onboarded) router.push("/feed"); });
+    }
   }, [status, session, router]);
 
   const checkUsername = useCallback(async (val: string) => {
