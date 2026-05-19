@@ -1,8 +1,19 @@
 export type Lang = "he" | "en";
 
+export const CATEGORY_EN: Record<string, string> = {
+  "בריאות": "Health",
+  "ספורט": "Sports",
+  "טכנולוגיה": "Technology",
+  "פיננסים": "Finance",
+  "בישול": "Cooking",
+  "טיולים": "Travel",
+  "מדע": "Science",
+  "משפט": "Law",
+  "אחר": "Other",
+};
+
 export const translations = {
   he: {
-    // Navbar
     nav: {
       feed: "פיד",
       askQuestion: "+ שאל שאלה",
@@ -11,7 +22,6 @@ export const translations = {
       signOut: "התנתק",
       connectedAs: "מחובר כ",
     },
-    // Landing page
     landing: {
       tagline: "שאל שאלה אחת - קבל תשובות מ-AI וקהילה",
       subTagline: "שאל AI וקהילה - קבל את התשובה הטובה ביותר",
@@ -27,7 +37,6 @@ export const translations = {
       feature3Desc: "כל שאלה מסווגת לקטגוריה",
       community: "קהילה",
     },
-    // Login page
     login: {
       title: "התחבר לחשבון",
       welcome: "ברוך הבא חזרה",
@@ -45,7 +54,6 @@ export const translations = {
       errorCredentials: "כתובת אימייל או סיסמה שגויים",
       errorGeneral: "שגיאה בהתחברות, נסה שוב",
     },
-    // Register page
     register: {
       title: "יצירת חשבון חדש",
       subtitle: "הצטרף לקהילת Qrowd",
@@ -63,9 +71,58 @@ export const translations = {
       errorPasswordLength: "הסיסמה חייבת להכיל לפחות 6 תווים",
       errorGeneral: "שגיאה בהרשמה, נסה שוב",
     },
+    feed: {
+      subtitle: "שאל AI וקהילה - קבל את התשובה הטובה ביותר",
+      all: "הכל",
+      noQuestions: "אין שאלות עדיין",
+      noQuestionsInCategory: 'בקטגוריה זו',
+      askFirst: "שאל את השאלה הראשונה",
+    },
+    ask: {
+      title: "שאל שאלה",
+      subtitle: "השאלה תישלח בו-זמנית ל-Claude, ChatGPT וGemini.",
+      subtitleNote: "הקטגוריה נקבעת אוטומטית.",
+      questionLabel: "השאלה שלך",
+      placeholder: "מה אתה רוצה לדעת?",
+      charCount: "תווים",
+      autoCategoryNote: "הקטגוריה (בריאות / ספורט / טכנולוגיה...) נקבעת אוטומטית על ידי AI",
+      authorLabel: "השאלה תפורסם בשם",
+      publicLabel: "שאלה ציבורית",
+      publicDesc: "תופיע בפיד, משתמשים יוכלו להגיב",
+      privateDesc: "רק אתה תראה את השאלה והתשובות",
+      submit: "שלח שאלה לכל ה-AI ✦",
+      submitting: "שולח לכל ה-AI...",
+      errorMinLength: "אנא הזן שאלה של לפחות 5 תווים",
+      loadingTitle: "מה קורה עכשיו:",
+      loadingClaude: "שולח שאלה ל-Claude...",
+      loadingChatGPT: "שולח שאלה ל-ChatGPT...",
+      loadingGemini: "שולח שאלה ל-Gemini...",
+      loadingCategory: "מסווג קטגוריה אוטומטית...",
+      loadingSummary: "מסכם ומפיק מסקנה...",
+      loadingTime: "עשוי לקחת 15-30 שניות",
+      loading: "טוען...",
+    },
+    question: {
+      back: "← חזור לפיד",
+      aiAnswers: "תשובות ה-AI",
+      models: "מודלים",
+      private: "🔒 פרטי",
+    },
+    components: {
+      conclusion: "✦ מסקנה",
+      error: "שגיאה",
+      summaryTitle: "סיכום ומסקנה",
+      bestConclusion: "המסקנה הטובה ביותר",
+      comments: "תגובות",
+      noComments: "אין תגובות עדיין. היה הראשון!",
+      namePlaceholder: "שמך (אופציונלי)",
+      commentPlaceholder: "כתוב תגובה...",
+      send: "שלח תגובה",
+      sending: "שולח...",
+      sendError: "שגיאה בשליחת התגובה. נסה שוב.",
+    },
   },
   en: {
-    // Navbar
     nav: {
       feed: "Feed",
       askQuestion: "+ Ask Question",
@@ -74,7 +131,6 @@ export const translations = {
       signOut: "Sign Out",
       connectedAs: "Signed in as",
     },
-    // Landing page
     landing: {
       tagline: "Ask one question — get answers from AI & community",
       subTagline: "Ask AI and community — get the best answer",
@@ -90,7 +146,6 @@ export const translations = {
       feature3Desc: "Every question is automatically categorized",
       community: "Community",
     },
-    // Login page
     login: {
       title: "Sign In to Your Account",
       welcome: "Welcome back",
@@ -108,7 +163,6 @@ export const translations = {
       errorCredentials: "Invalid email or password",
       errorGeneral: "Sign in error, please try again",
     },
-    // Register page
     register: {
       title: "Create a New Account",
       subtitle: "Join the Qrowd community",
@@ -125,6 +179,56 @@ export const translations = {
       loginLink: "Sign in here",
       errorPasswordLength: "Password must be at least 6 characters",
       errorGeneral: "Registration error, please try again",
+    },
+    feed: {
+      subtitle: "Ask AI and community — get the best answer",
+      all: "All",
+      noQuestions: "No questions yet",
+      noQuestionsInCategory: "in this category",
+      askFirst: "Ask the first question",
+    },
+    ask: {
+      title: "Ask a Question",
+      subtitle: "Your question will be sent simultaneously to Claude, ChatGPT, and Gemini.",
+      subtitleNote: "Category is determined automatically.",
+      questionLabel: "Your Question",
+      placeholder: "What do you want to know?",
+      charCount: "characters",
+      autoCategoryNote: "Category (Health / Sports / Technology...) is determined automatically by AI",
+      authorLabel: "Question will be posted as",
+      publicLabel: "Public Question",
+      publicDesc: "Appears in feed, users can comment",
+      privateDesc: "Only you will see this question and its answers",
+      submit: "Send Question to All AI ✦",
+      submitting: "Sending to all AI...",
+      errorMinLength: "Please enter a question with at least 5 characters",
+      loadingTitle: "What's happening now:",
+      loadingClaude: "Sending question to Claude...",
+      loadingChatGPT: "Sending question to ChatGPT...",
+      loadingGemini: "Sending question to Gemini...",
+      loadingCategory: "Auto-categorizing...",
+      loadingSummary: "Summarizing and generating conclusion...",
+      loadingTime: "May take 15-30 seconds",
+      loading: "Loading...",
+    },
+    question: {
+      back: "← Back to Feed",
+      aiAnswers: "AI Answers",
+      models: "models",
+      private: "🔒 Private",
+    },
+    components: {
+      conclusion: "✦ Conclusion",
+      error: "Error",
+      summaryTitle: "Summary & Conclusion",
+      bestConclusion: "Best Conclusion",
+      comments: "Comments",
+      noComments: "No comments yet. Be the first!",
+      namePlaceholder: "Your name (optional)",
+      commentPlaceholder: "Write a comment...",
+      send: "Post Comment",
+      sending: "Sending...",
+      sendError: "Error posting comment. Please try again.",
     },
   },
 };

@@ -1,5 +1,8 @@
+"use client";
 import Link from "next/link";
 import CategoryBadge from "./CategoryBadge";
+import { useLangContext } from "@/components/LangProvider";
+import { getTranslations } from "@/lib/i18n";
 
 interface Props {
   id: string;
@@ -20,7 +23,10 @@ export default function QuestionCard({
   conclusion,
   commentCount,
 }: Props) {
-  const date = new Date(createdAt).toLocaleDateString("he-IL", {
+  const { lang } = useLangContext();
+  const t = getTranslations(lang).components;
+  const locale = lang === "he" ? "he-IL" : "en-US";
+  const date = new Date(createdAt).toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -40,7 +46,7 @@ export default function QuestionCard({
 
         {conclusion && (
           <div className="bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 mb-3">
-            <p className="text-xs text-indigo-500 font-medium mb-0.5">✦ מסקנה</p>
+            <p className="text-xs text-indigo-500 font-medium mb-0.5">{t.conclusion}</p>
             <p className="text-sm text-indigo-800 line-clamp-2 leading-relaxed">{conclusion}</p>
           </div>
         )}

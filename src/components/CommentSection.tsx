@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { useLangContext } from "@/components/LangProvider";
+import { getTranslations } from "@/lib/i18n";
 
 interface Comment {
   id: string;
@@ -14,6 +16,10 @@ interface Props {
 }
 
 export default function CommentSection({ questionId, initialComments }: Props) {
+  const { lang } = useLangContext();
+  const t = getTranslations(lang).components;
+  const locale = lang === "he" ? "he-IL" : "en-US";
+
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [text, setText] = useState("");
   const [author, setAuthor] = useState("");
@@ -29,14 +35,14 @@ export default function CommentSection({ questionId, initialComments }: Props) {
       const res = await fetch(`/api/questions/${questionId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: text, authorName: author || "אנונימי" }),
+        body: JSON.stringify({ content: text, authorName: author || (lang === "he" ? "אנונימי" : "Anonymous") }),
       });
-      if (!res.ok) throw new Error("שגיאה בשליחה");
+      if (!res.ok) throw new Error(t.sendError);
       const comment = await res.json();
       setComments((prev) => [...prev, comment]);
       setText("");
     } catch {
-      setError("שגיאה בשליחת התגובה. נסה שוב.");
+      setError(t.sendError);
     } finally {
       setLoading(false);
     }
@@ -46,24 +52,22 @@ export default function CommentSection({ questionId, initialComments }: Props) {
     <div>
       <h3 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
         <span>💬</span>
-        <span>תגובות ({comments.length})</span>
+        <span>{t.comments} ({comments.length})</span>
       </h3>
 
       <div className="space-y-3 mb-5">
         {comments.length === 0 && (
-          <p className="text-gray-400 text-sm text-center py-6">
-            אין תגובות עדיין. היה הראשון!
-          </p>
+          <p className="text-gray-400 text-sm text-center py-6">{t.noComments}</p>
         )}
         {comments.map((c) => (
           <div key={c.id} className="bg-gray-50 border border-gray-200 rounded-xl p-3.5">
             <div className="flex items-center gap-2 mb-1.5">
               <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600 flex-shrink-0">
-                {c.authorName.charAt(0)}
+                {c.authorName.charAt(0).toUpperCase()}
               </div>
               <span className="text-sm font-medium text-gray-700">{c.authorName}</span>
               <span className="text-xs text-gray-400 mr-auto">
-                {new Date(c.createdAt).toLocaleDateString("he-IL")}
+                {new Date(c.createdAt).toLocaleDateString(locale)}
               </span>
             </div>
             <p className="text-sm text-gray-700 leading-relaxed">{c.content}</p>
@@ -74,14 +78,14 @@ export default function CommentSection({ questionId, initialComments }: Props) {
       <form onSubmit={submitComment} className="space-y-2.5">
         <input
           type="text"
-          placeholder="שמך (אופציונלי)"
+          placeholder={t.namePlaceholder}
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
           className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-indigo-300"
           disabled={loading}
         />
         <textarea
-          placeholder="כתוב תגובה..."
+          placeholder={t.commentPlaceholder}
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={3}
@@ -95,7 +99,7 @@ export default function CommentSection({ questionId, initialComments }: Props) {
           disabled={loading || !text.trim()}
           className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold text-base hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 transition-colors"
         >
-          {loading ? "שולח..." : "שלח תגובה"}
+          {loading ? t.sending : t.send}
         </button>
       </form>
     </div>

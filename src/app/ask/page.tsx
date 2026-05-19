@@ -2,23 +2,26 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useLangContext } from "@/components/LangProvider";
+import { getTranslations } from "@/lib/i18n";
 
 export default function AskPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { lang } = useLangContext();
+  const t = getTranslations(lang).ask;
+
   const [text, setText] = useState("");
   const [isPublic, setIsPublic] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/login?callbackUrl=/ask");
     }
   }, [status, router]);
 
-  // Show loading while checking auth
   if (status === "loading" || status === "unauthenticated") {
     return (
       <div className="max-w-2xl mx-auto pb-10 flex items-center justify-center py-20">
@@ -27,18 +30,18 @@ export default function AskPage() {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
           </svg>
-          <p className="text-gray-400 text-sm">טוען...</p>
+          <p className="text-gray-400 text-sm">{t.loading}</p>
         </div>
       </div>
     );
   }
 
-  const authorName = session?.user?.name || session?.user?.email || "אנונימי";
+  const authorName = session?.user?.name || session?.user?.email || (lang === "he" ? "אנונימי" : "Anonymous");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!text.trim() || text.trim().length < 5) {
-      setError("אנא הזן שאלה של לפחות 5 תווים");
+      setError(t.errorMinLength);
       return;
     }
     setLoading(true);
@@ -51,7 +54,7 @@ export default function AskPage() {
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error ?? "שגיאה");
+        throw new Error(err.error ?? t.errorMinLength);
       }
       const question = await res.json();
       router.push(`/question/${question.id}`);
@@ -64,62 +67,49 @@ export default function AskPage() {
   return (
     <div className="max-w-2xl mx-auto pb-10">
       <div className="mb-5">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">שאל שאלה</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">{t.title}</h1>
         <p className="text-gray-500 text-sm leading-relaxed">
-          השאלה תישלח בו-זמנית ל-Claude, ChatGPT וGemini.
+          {t.subtitle}
           <br />
-          <span className="text-indigo-600 font-medium">הקטגוריה נקבעת אוטומטית.</span>
+          <span className="text-indigo-600 font-medium">{t.subtitleNote}</span>
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-5">
-        {/* Question */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            השאלה שלך
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">{t.questionLabel}</label>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="מה אתה רוצה לדעת?"
+            placeholder={t.placeholder}
             rows={5}
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none leading-relaxed"
             required
             disabled={loading}
           />
-          <p className="text-xs text-gray-400 mt-1">{text.length} תווים</p>
+          <p className="text-xs text-gray-400 mt-1">{text.length} {t.charCount}</p>
         </div>
 
-        {/* Auto-category notice */}
         <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2.5">
           <span className="text-lg">🏷️</span>
-          <p className="text-xs text-indigo-700">
-            הקטגוריה (בריאות / ספורט / טכנולוגיה...) נקבעת <strong>אוטומטית</strong> על ידי AI
-          </p>
+          <p className="text-xs text-indigo-700">{t.autoCategoryNote}</p>
         </div>
 
-        {/* Author (read-only from session) */}
         <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
           <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
             {authorName.charAt(0).toUpperCase()}
           </div>
           <div>
-            <p className="text-xs text-gray-400">השאלה תפורסם בשם</p>
+            <p className="text-xs text-gray-400">{t.authorLabel}</p>
             <p className="text-sm font-semibold text-gray-700">{authorName}</p>
           </div>
         </div>
 
-        {/* Public toggle */}
         <div className="flex items-center justify-between py-1">
           <div>
-            <p className="text-sm font-semibold text-gray-700">שאלה ציבורית</p>
-            <p className="text-xs text-gray-400 mt-0.5">
-              {isPublic
-                ? "תופיע בפיד, משתמשים יוכלו להגיב"
-                : "רק אתה תראה את השאלה והתשובות"}
-            </p>
+            <p className="text-sm font-semibold text-gray-700">{t.publicLabel}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{isPublic ? t.publicDesc : t.privateDesc}</p>
           </div>
-          {/* Toggle – fixed for RTL */}
           <button
             type="button"
             onClick={() => setIsPublic(!isPublic)}
@@ -154,24 +144,22 @@ export default function AskPage() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
-              שולח לכל ה-AI...
+              {t.submitting}
             </span>
-          ) : (
-            "שלח שאלה לכל ה-AI ✦"
-          )}
+          ) : t.submit}
         </button>
 
         {loading && (
           <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
-            <p className="text-sm text-indigo-700 font-semibold mb-2">מה קורה עכשיו:</p>
+            <p className="text-sm text-indigo-700 font-semibold mb-2">{t.loadingTitle}</p>
             <ul className="text-sm text-indigo-600 space-y-1.5">
-              <li className="flex items-center gap-2"><span>🟠</span> שולח שאלה ל-Claude...</li>
-              <li className="flex items-center gap-2"><span>🟢</span> שולח שאלה ל-ChatGPT...</li>
-              <li className="flex items-center gap-2"><span>🔵</span> שולח שאלה ל-Gemini...</li>
-              <li className="flex items-center gap-2"><span>🏷️</span> מסווג קטגוריה אוטומטית...</li>
-              <li className="flex items-center gap-2"><span>✦</span> מסכם ומפיק מסקנה...</li>
+              <li className="flex items-center gap-2"><span>🟠</span> {t.loadingClaude}</li>
+              <li className="flex items-center gap-2"><span>🟢</span> {t.loadingChatGPT}</li>
+              <li className="flex items-center gap-2"><span>🔵</span> {t.loadingGemini}</li>
+              <li className="flex items-center gap-2"><span>🏷️</span> {t.loadingCategory}</li>
+              <li className="flex items-center gap-2"><span>✦</span> {t.loadingSummary}</li>
             </ul>
-            <p className="text-xs text-indigo-400 mt-2">עשוי לקחת 15-30 שניות</p>
+            <p className="text-xs text-indigo-400 mt-2">{t.loadingTime}</p>
           </div>
         )}
       </form>

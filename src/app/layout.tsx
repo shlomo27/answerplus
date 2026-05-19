@@ -4,10 +4,11 @@ import Navbar from "@/components/Navbar";
 import SessionProvider from "@/components/SessionProvider";
 import { LangProvider } from "@/components/LangProvider";
 import { headers } from "next/headers";
+import type { Lang } from "@/lib/i18n";
 
 export const metadata: Metadata = {
-  title: "Qrowd – שאל AI וקהילה",
-  description: "שאל AI וקהילה - קבל את התשובה הטובה ביותר",
+  title: "Qrowd",
+  description: "Ask AI and community — get the best answer",
 };
 
 export const viewport: Viewport = {
@@ -18,19 +19,20 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Server-side language detection via Accept-Language header
   const headersList = await headers();
   const acceptLanguage = headersList.get("accept-language") || "";
-  const isHebrew = acceptLanguage.startsWith("he") || acceptLanguage.includes(",he") || acceptLanguage.includes(";he");
-  // Default to Hebrew for this app, switch to English only if browser explicitly prefers English first
-  const defaultLang = acceptLanguage && !isHebrew && acceptLanguage.startsWith("en") ? "en" : "he";
+  const isHebrew =
+    acceptLanguage.startsWith("he") ||
+    acceptLanguage.includes(",he") ||
+    acceptLanguage.includes(";he");
+  const defaultLang: Lang = isHebrew ? "he" : "en";
   const dir = defaultLang === "he" ? "rtl" : "ltr";
 
   return (
     <html lang={defaultLang} dir={dir}>
       <body>
         <SessionProvider>
-          <LangProvider>
+          <LangProvider initialLang={defaultLang}>
             <Navbar />
             <main className="max-w-5xl mx-auto px-4 py-5">{children}</main>
           </LangProvider>
