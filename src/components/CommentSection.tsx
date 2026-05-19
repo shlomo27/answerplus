@@ -10,6 +10,7 @@ interface Comment {
   content: string;
   createdAt: string;
   parentId?: string | null;
+  userId?: string | null;
 }
 
 interface Props {
@@ -96,6 +97,23 @@ export default function CommentSection({ questionId, initialComments }: Props) {
     }
   }
 
+  async function deleteComment(commentId: string, isTopLevel: boolean) {
+    try {
+      const res = await fetch(`/api/questions/${questionId}/comments/${commentId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) return;
+      if (isTopLevel) {
+        // Remove top-level comment and all its replies
+        setComments((prev) => prev.filter((c) => c.id !== commentId && c.parentId !== commentId));
+      } else {
+        setComments((prev) => prev.filter((c) => c.id !== commentId));
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   const topLevel = comments.filter((c) => !c.parentId);
   const repliesMap: Record<string, Comment[]> = {};
   for (const c of comments) {
@@ -120,6 +138,7 @@ export default function CommentSection({ questionId, initialComments }: Props) {
         )}
         {topLevel.map((c) => {
           const replies = repliesMap[c.id] ?? [];
+          const isOwnComment = !!(session?.user?.id && c.userId && session.user.id === c.userId);
           return (
             <div key={c.id}>
               {/* Top-level comment */}
@@ -132,6 +151,16 @@ export default function CommentSection({ questionId, initialComments }: Props) {
                   <span className="text-xs text-gray-400 mr-auto">
                     {new Date(c.createdAt).toLocaleDateString(locale)}
                   </span>
+                  {isOwnComment && (
+                    <button
+                      type="button"
+                      onClick={() => deleteComment(c.id, true)}
+                      className="text-xs text-red-400 hover:text-red-600 px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors"
+                      title={t.deleteComment}
+                    >
+                      🗑
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
@@ -150,20 +179,33 @@ export default function CommentSection({ questionId, initialComments }: Props) {
               {/* Replies */}
               {replies.length > 0 && (
                 <div className="ml-5 mt-1.5 space-y-1.5 border-l-2 border-indigo-200 pl-3">
-                  {replies.map((r) => (
-                    <div key={r.id} className="bg-white border border-gray-100 rounded-xl p-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-600 flex-shrink-0">
-                          {r.authorName.charAt(0).toUpperCase()}
+                  {replies.map((r) => {
+                    const isOwnReply = !!(session?.user?.id && r.userId && session.user.id === r.userId);
+                    return (
+                      <div key={r.id} className="bg-white border border-gray-100 rounded-xl p-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-600 flex-shrink-0">
+                            {r.authorName.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-sm font-medium text-gray-700">{r.authorName}</span>
+                          <span className="text-xs text-gray-400 mr-auto">
+                            {new Date(r.createdAt).toLocaleDateString(locale)}
+                          </span>
+                          {isOwnReply && (
+                            <button
+                              type="button"
+                              onClick={() => deleteComment(r.id, false)}
+                              className="text-xs text-red-400 hover:text-red-600 px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors"
+                              title={t.deleteComment}
+                            >
+                              🗑
+                            </button>
+                          )}
                         </div>
-                        <span className="text-sm font-medium text-gray-700">{r.authorName}</span>
-                        <span className="text-xs text-gray-400 mr-auto">
-                          {new Date(r.createdAt).toLocaleDateString(locale)}
-                        </span>
+                        <p className="text-sm text-gray-600 leading-relaxed">{r.content}</p>
                       </div>
-                      <p className="text-sm text-gray-600 leading-relaxed">{r.content}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -171,6 +213,19 @@ export default function CommentSection({ questionId, initialComments }: Props) {
               {replyingTo === c.id && (
                 <div className="ml-5 mt-1.5 border-l-2 border-indigo-200 pl-3">
                   <div className="flex flex-col gap-1.5">
+                    {/* Anonymous toggle for logged-in users in reply form */}
+                    {isLoggedIn && (
+                      <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={anonymous}
+                          onChange={(e) => setAnonymous(e.target.checked)}
+                          className="w-4 h-4 rounded accent-indigo-600"
+                          disabled={replyLoading}
+                        />
+                        {t.anonymousToggle}
+                      </label>
+                    )}
                     <textarea
                       placeholder={t.replyPlaceholder}
                       value={replyText}

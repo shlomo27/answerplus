@@ -96,6 +96,7 @@ export default function Navbar() {
   function getNotifText(type: string) {
     if (type === "like") return tc.notifLike;
     if (type === "comment") return tc.notifComment;
+    if (type === "reply") return tc.notifReply;
     return type;
   }
 
@@ -169,7 +170,7 @@ export default function Navbar() {
                             onClick={() => setBellOpen(false)}
                             className="flex items-start gap-2 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
                           >
-                            <span className="text-base flex-shrink-0">{n.type === "like" ? "❤️" : "💬"}</span>
+                            <span className="text-base flex-shrink-0">{n.type === "like" ? "❤️" : n.type === "reply" ? "↩️" : "💬"}</span>
                             <div className="min-w-0">
                               <p className="text-sm text-gray-700">
                                 <span className="font-medium">{n.actorName}</span>{" "}

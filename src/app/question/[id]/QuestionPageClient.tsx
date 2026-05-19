@@ -24,7 +24,7 @@ interface Props {
     videoUrl?: string | null;
     responses: { id: string; provider: string; content: string; error: boolean }[];
     summary: { content: string; conclusion: string } | null;
-    comments: { id: string; authorName: string; content: string; createdAt: string; parentId?: string | null }[];
+    comments: { id: string; authorName: string; content: string; createdAt: string; parentId?: string | null; userId?: string | null }[];
   };
 }
 
