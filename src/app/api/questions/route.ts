@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { queryAllProviders } from "@/lib/ai/providers";
 import { generateSummary } from "@/lib/ai/summarize";
 import { categorizeQuestion } from "@/lib/ai/categorize";
+import { auth } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   const category = req.nextUrl.searchParams.get("category");
@@ -24,6 +25,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await auth();
+  const userId = session?.user?.id ?? null;
+
   const body = await req.json();
   const {
     text,
@@ -51,6 +55,7 @@ export async function POST(req: NextRequest) {
         type: "post",
         isPublic,
         authorName,
+        userId,
         imageUrl: imageUrl ?? null,
         videoUrl: videoUrl ?? null,
       },
@@ -74,6 +79,7 @@ export async function POST(req: NextRequest) {
       type: "ai_question",
       isPublic,
       authorName,
+      userId,
       responses: {
         create: responses.map((r) => ({
           provider: r.provider,

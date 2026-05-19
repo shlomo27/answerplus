@@ -14,6 +14,7 @@ model Question {
   type       String      @default("ai_question")
   isPublic   Boolean     @default(true)
   authorName String      @default("אנונימי")
+  userId     String?
   imageUrl   String?
   videoUrl   String?
   createdAt  DateTime    @default(now())

@@ -27,6 +27,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
         type: question.type,
         isPublic: question.isPublic,
         authorName: question.authorName,
+        userId: question.userId,
         createdAt: question.createdAt.toISOString(),
         imageUrl: question.imageUrl,
         videoUrl: question.videoUrl,

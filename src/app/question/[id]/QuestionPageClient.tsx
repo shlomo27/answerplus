@@ -1,5 +1,8 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import AIResponseCard from "@/components/AIResponseCard";
 import SummaryCard from "@/components/SummaryCard";
 import CommentSection from "@/components/CommentSection";
@@ -15,6 +18,7 @@ interface Props {
     type: string;
     isPublic: boolean;
     authorName: string;
+    userId?: string | null;
     createdAt: string;
     imageUrl?: string | null;
     videoUrl?: string | null;
@@ -47,6 +51,26 @@ export default function QuestionPageClient({ question }: Props) {
   const t = getTranslations(lang).question;
   const locale = lang === "he" ? "he-IL" : "en-US";
   const isPost = question.type === "post";
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const isOwner = session?.user?.id && question.userId && session.user.id === question.userId;
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/questions/${question.id}`, { method: "DELETE" });
+      if (res.ok) {
+        router.push("/feed");
+        router.refresh();
+      }
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(false);
+    }
+  }
 
   const date = new Date(question.createdAt).toLocaleDateString(locale, {
     day: "numeric",
@@ -60,9 +84,49 @@ export default function QuestionPageClient({ question }: Props) {
 
   return (
     <div className="max-w-3xl mx-auto pb-10">
-      <Link href="/feed" className="inline-flex items-center gap-1 text-sm text-indigo-600 mb-4 py-1">
-        {t.back}
-      </Link>
+      {/* Confirm delete dialog */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+            <h3 className="font-bold text-gray-900 text-base mb-2">
+              {lang === "he" ? "מחיקת פוסט" : "Delete Post"}
+            </h3>
+            <p className="text-sm text-gray-500 mb-5">
+              {lang === "he" ? "האם אתה בטוח? פעולה זו לא ניתנת לביטול." : "Are you sure? This action cannot be undone."}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                disabled={deleting}
+              >
+                {lang === "he" ? "ביטול" : "Cancel"}
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 py-2.5 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 disabled:opacity-50"
+              >
+                {deleting ? "..." : (lang === "he" ? "מחק" : "Delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mb-4">
+        <Link href="/feed" className="inline-flex items-center gap-1 text-sm text-indigo-600 py-1">
+          {t.back}
+        </Link>
+        {isOwner && (
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="text-sm text-red-500 hover:text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
+          >
+            {lang === "he" ? "🗑 מחק" : "🗑 Delete"}
+          </button>
+        )}
+      </div>
 
       {/* Header */}
       <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 mb-4 shadow-sm">
