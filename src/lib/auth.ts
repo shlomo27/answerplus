@@ -109,11 +109,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // ignore DB errors in JWT callback
         }
       }
+      if (token.id) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { username: true, avatarId: true, onboarded: true, interests: true },
+          });
+          if (dbUser) {
+            token.username = dbUser.username;
+            token.avatarId = dbUser.avatarId;
+            token.onboarded = dbUser.onboarded;
+            token.interests = dbUser.interests ? JSON.parse(dbUser.interests) : [];
+          }
+        } catch {
+          // ignore
+        }
+      }
       return token;
     },
     async session({ session, token }) {
       if (token?.id && session.user) {
         session.user.id = token.id as string;
+        session.user.username = (token.username as string | null) ?? null;
+        session.user.avatarId = (token.avatarId as string | null) ?? null;
+        session.user.onboarded = (token.onboarded as boolean) ?? false;
+        session.user.interests = (token.interests as string[]) ?? [];
       }
       return session;
     },
