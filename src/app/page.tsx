@@ -13,14 +13,18 @@ export default function LandingPage() {
   const t = getTranslations(lang).landing;
   const isRTL = lang === "he";
 
-  // Redirect authenticated users to feed
   useEffect(() => {
-    if (status === "authenticated" && session?.user) {
-      router.push("/feed");
-    }
-  }, [session, status, router]);
+    if (status !== "authenticated") return;
+    fetch("/api/user/me")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.onboarded) router.push("/feed");
+        // if not onboarded, OnboardingGuard handles the redirect to /onboarding
+      })
+      .catch(() => router.push("/feed"));
+  }, [status, router]);
 
-  if (status === "loading") return null;
+  if (status === "loading" || status === "authenticated") return null;
 
   return (
     <div
