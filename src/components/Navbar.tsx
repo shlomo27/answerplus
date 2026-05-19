@@ -41,8 +41,6 @@ export default function Navbar() {
   const t = getTranslations(lang).nav;
   const tc = getTranslations(lang).components;
 
-  if (pathname === "/") return null;
-
   const avatarUrl = session?.user?.avatarId ? AVATAR_URLS[session.user.avatarId] : null;
   const displayName = session?.user?.username
     ? `@${session.user.username}`
@@ -76,7 +74,6 @@ export default function Navbar() {
     }
   }
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     if (!session?.user) return;
     fetchNotifications();
@@ -84,8 +81,6 @@ export default function Navbar() {
     return () => clearInterval(interval);
   }, [session?.user]);
 
-  // Close bell dropdown when clicking outside
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (bellRef.current && !bellRef.current.contains(e.target as Node)) {
@@ -103,6 +98,8 @@ export default function Navbar() {
     if (type === "comment") return tc.notifComment;
     return type;
   }
+
+  if (pathname === "/") return null;
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
