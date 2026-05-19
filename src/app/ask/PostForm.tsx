@@ -98,25 +98,23 @@ export default function PostForm() {
       return;
     }
 
-    // If custom category, validate with AI first
-    if (isCustom && customCategory.trim()) {
-      setValidating(true);
-      try {
-        const res = await fetch("/api/validate-category", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: content.trim(), category: customCategory.trim() }),
-        });
-        const data = await res.json();
-        setValidating(false);
-        if (!data.matches && data.suggestedCategory !== customCategory.trim()) {
-          setMismatch({ yourCategory: customCategory.trim(), suggestedCategory: data.suggestedCategory });
-          setPendingSubmit(true);
-          return;
-        }
-      } catch {
-        setValidating(false);
+    // Validate category against content (always, not just for custom)
+    setValidating(true);
+    try {
+      const res = await fetch("/api/validate-category", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: content.trim(), category: effectiveCategory.trim() }),
+      });
+      const data = await res.json();
+      setValidating(false);
+      if (!data.matches && data.suggestedCategory !== effectiveCategory.trim()) {
+        setMismatch({ yourCategory: effectiveCategory.trim(), suggestedCategory: data.suggestedCategory });
+        setPendingSubmit(true);
+        return;
       }
+    } catch {
+      setValidating(false);
     }
 
     await validateAndSubmit(effectiveCategory.trim());
