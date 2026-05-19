@@ -11,6 +11,11 @@ export default function OnboardingGuard() {
   useEffect(() => {
     if (status !== "authenticated") return;
     if (pathname === "/onboarding") return;
+    // Skip redirect if user just finished onboarding (session hasn't refreshed yet)
+    if (sessionStorage.getItem("onboardingDone") === "1") {
+      sessionStorage.removeItem("onboardingDone");
+      return;
+    }
     if (!session.user.onboarded) {
       router.push("/onboarding");
     }

@@ -79,7 +79,12 @@ export default function OnboardingPage() {
       setSaving(false);
       return;
     }
-    await update(); // refresh session
+    // Flag so OnboardingGuard won't redirect back before session refreshes
+    sessionStorage.setItem("onboardingDone", "1");
+    // update() can hang in NextAuth v5 beta — fallback after 2s
+    const timeout = setTimeout(() => router.push("/feed"), 2000);
+    try { await update(); } catch { /* ignore */ }
+    clearTimeout(timeout);
     router.push("/feed");
   }
 
@@ -234,7 +239,7 @@ export default function OnboardingPage() {
               disabled={interests.length === 0 || saving}
               className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold text-base hover:bg-indigo-700 disabled:opacity-50 transition-all active:scale-[0.99]"
             >
-              {saving ? t.finishing : `${t.finish} (${interests.length} נבחרו)`}
+              {saving ? t.finishing : `${t.finish} (${interests.length} ${lang === "he" ? "נבחרו" : "selected"})`}
             </button>
           </div>
         </div>
