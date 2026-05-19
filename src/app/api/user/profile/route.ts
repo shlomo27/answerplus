@@ -24,25 +24,27 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const dbUser = await prisma.user.findUnique({
-      where: { email },
-      select: { id: true },
-    });
-    if (!dbUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
     const existing = await prisma.user.findFirst({
-      where: { username, NOT: { id: dbUser.id } },
+      where: { username, NOT: { email } },
       select: { id: true },
     });
     if (existing) {
       return NextResponse.json({ error: "Username taken" }, { status: 409 });
     }
 
-    await prisma.user.update({
-      where: { id: dbUser.id },
-      data: {
+    await prisma.user.upsert({
+      where: { email },
+      update: {
+        username,
+        avatarId: avatarId ?? null,
+        interests: JSON.stringify(interests),
+        onboarded: true,
+      },
+      create: {
+        email,
+        name: session.user.name ?? null,
+        image: session.user.image ?? null,
+        emailVerified: new Date(),
         username,
         avatarId: avatarId ?? null,
         interests: JSON.stringify(interests),
