@@ -37,35 +37,25 @@ export async function POST(
       },
     });
 
-    // Create notification for question owner if different user
-    if (question.userId && commenter && commenter.id !== question.userId) {
-      await prisma.notification.create({
-        data: {
-          userId: question.userId,
-          type: "comment",
-          questionId: id,
-          actorName: authorName,
-        },
-      });
-    }
+    let questionOwnerNotified = false;
 
-    // If this is a reply, also notify the parent comment's author
+    // For replies: notify parent comment author first
     if (parentId) {
       const parentComment = await prisma.comment.findUnique({ where: { id: parentId } });
-      if (
-        parentComment?.userId &&
-        parentComment.userId !== (commenter?.id ?? null) &&
-        parentComment.userId !== question.userId
-      ) {
+      if (parentComment?.userId && parentComment.userId !== (commenter?.id ?? null)) {
         await prisma.notification.create({
-          data: {
-            userId: parentComment.userId,
-            type: "reply",
-            questionId: id,
-            actorName: authorName,
-          },
+          data: { userId: parentComment.userId, type: "reply", questionId: id, actorName: authorName },
         });
+        // If the question owner IS the parent comment author, they're already notified
+        if (parentComment.userId === question.userId) questionOwnerNotified = true;
       }
+    }
+
+    // Notify question owner for any activity on their post (unless already notified above)
+    if (!questionOwnerNotified && question.userId && commenter?.id !== question.userId) {
+      await prisma.notification.create({
+        data: { userId: question.userId, type: "comment", questionId: id, actorName: authorName },
+      });
     }
 
     return NextResponse.json(comment, { status: 201 });
