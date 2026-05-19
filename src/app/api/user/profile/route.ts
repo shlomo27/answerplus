@@ -17,24 +17,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Select at least one interest" }, { status: 400 });
   }
 
-  // Check username uniqueness (excluding current user)
-  const existing = await prisma.user.findFirst({
-    where: { username, NOT: { id: session.user.id } },
-    select: { id: true },
-  });
-  if (existing) {
-    return NextResponse.json({ error: "Username taken" }, { status: 409 });
-  }
+  try {
+    const existing = await prisma.user.findFirst({
+      where: { username, NOT: { id: session.user.id } },
+      select: { id: true },
+    });
+    if (existing) {
+      return NextResponse.json({ error: "Username taken" }, { status: 409 });
+    }
 
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: {
-      username,
-      avatarId: avatarId ?? null,
-      interests: JSON.stringify(interests),
-      onboarded: true,
-    },
-  });
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        username,
+        avatarId: avatarId ?? null,
+        interests: JSON.stringify(interests),
+        onboarded: true,
+      },
+    });
+  } catch (e) {
+    console.error("[profile] DB error:", e);
+    return NextResponse.json({ error: "DB error: " + String(e) }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }

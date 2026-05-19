@@ -68,20 +68,42 @@ export default function OnboardingPage() {
     if (!username || usernameStatus !== "available") return;
     if (interests.length === 0) { setError(t.interestsLabel); return; }
     setSaving(true);
-    const res = await fetch("/api/user/profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, avatarId, interests }),
-    });
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error ?? "Error");
+    setError("");
+
+    try {
+      const controller = new AbortController();
+      const fetchTimeout = setTimeout(() => controller.abort(), 12000);
+
+      let res: Response;
+      try {
+        res = await fetch("/api/user/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, avatarId, interests }),
+          signal: controller.signal,
+        });
+        clearTimeout(fetchTimeout);
+      } catch {
+        clearTimeout(fetchTimeout);
+        setError(lang === "he" ? "שגיאת חיבור, נסה שוב" : "Connection error, please try again");
+        setSaving(false);
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error ?? "Error");
+        setSaving(false);
+        return;
+      }
+    } catch {
+      setError(lang === "he" ? "שגיאה, נסה שוב" : "Error, please try again");
       setSaving(false);
       return;
     }
-    // Flag so OnboardingGuard won't redirect back before session refreshes
+
     sessionStorage.setItem("onboardingDone", "1");
-    // update() can hang in NextAuth v5 beta — fallback after 2s
+    // update() can hang in NextAuth v5 beta — redirect after 2s regardless
     const timeout = setTimeout(() => router.push("/feed"), 2000);
     try { await update(); } catch { /* ignore */ }
     clearTimeout(timeout);
