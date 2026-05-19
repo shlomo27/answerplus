@@ -185,6 +185,9 @@ export const translations = {
       markAllRead: "סמן הכל כנקרא",
       notifLike: "אהב את הפוסט שלך",
       notifComment: "הגיב על הפוסט שלך",
+      reply: "השב",
+      replyPlaceholder: "כתוב תגובה...",
+      cancelReply: "ביטול",
     },
   },
   en: {
@@ -359,6 +362,9 @@ export const translations = {
       markAllRead: "Mark all read",
       notifLike: "liked your post",
       notifComment: "commented on your post",
+      reply: "Reply",
+      replyPlaceholder: "Write a reply...",
+      cancelReply: "Cancel",
     },
   },
 };

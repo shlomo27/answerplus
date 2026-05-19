@@ -8,7 +8,7 @@ export async function POST(
 ) {
   const { id } = await params;
   const body = await req.json();
-  const { content, authorName = "אנונימי" } = body;
+  const { content, authorName = "אנונימי", parentId } = body;
 
   if (!content || typeof content !== "string" || content.trim().length < 2) {
     return NextResponse.json({ error: "תגובה קצרה מדי" }, { status: 400 });
@@ -21,7 +21,12 @@ export async function POST(
     }
 
     const comment = await prisma.comment.create({
-      data: { questionId: id, content: content.trim(), authorName },
+      data: {
+        questionId: id,
+        content: content.trim(),
+        authorName,
+        ...(parentId ? { parentId } : {}),
+      },
     });
 
     // Create notification for question owner if different user

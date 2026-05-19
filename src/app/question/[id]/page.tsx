@@ -45,6 +45,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
           authorName: c.authorName,
           content: c.content,
           createdAt: c.createdAt.toISOString(),
+          parentId: c.parentId ?? null,
         })),
       }}
     />
