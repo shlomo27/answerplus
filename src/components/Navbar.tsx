@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLangContext } from "@/components/LangProvider";
 import { getTranslations } from "@/lib/i18n";
 
@@ -21,12 +21,25 @@ const AVATAR_URLS: Record<string, string> = {
   cat: "https://api.dicebear.com/9.x/fun-emoji/png?seed=qrowd-cat&backgroundColor=fff0d4",
 };
 
+interface NotificationItem {
+  id: string;
+  type: string;
+  questionId: string;
+  actorName: string;
+  createdAt: string;
+}
+
 export default function Navbar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [bellOpen, setBellOpen] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
+  const [notifItems, setNotifItems] = useState<NotificationItem[]>([]);
+  const bellRef = useRef<HTMLDivElement>(null);
   const { lang, setLang } = useLangContext();
   const t = getTranslations(lang).nav;
+  const tc = getTranslations(lang).components;
 
   if (pathname === "/") return null;
 
@@ -35,6 +48,61 @@ export default function Navbar() {
     ? `@${session.user.username}`
     : (session?.user?.name || session?.user?.email || "?");
   const initial = (session?.user?.username || session?.user?.name || session?.user?.email || "?").charAt(0).toUpperCase();
+
+  async function fetchNotifications() {
+    try {
+      const res = await fetch("/api/notifications");
+      if (res.ok) {
+        const data = await res.json();
+        setNotifCount(data.count ?? 0);
+        setNotifItems(data.items ?? []);
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  async function markAllRead() {
+    try {
+      await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ all: true }),
+      });
+      setNotifCount(0);
+      setNotifItems([]);
+    } catch {
+      // ignore
+    }
+  }
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    if (!session?.user) return;
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60000);
+    return () => clearInterval(interval);
+  }, [session?.user]);
+
+  // Close bell dropdown when clicking outside
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (bellRef.current && !bellRef.current.contains(e.target as Node)) {
+        setBellOpen(false);
+      }
+    }
+    if (bellOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [bellOpen]);
+
+  function getNotifText(type: string) {
+    if (type === "like") return tc.notifLike;
+    if (type === "comment") return tc.notifComment;
+    return type;
+  }
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
@@ -67,6 +135,61 @@ export default function Navbar() {
 
           {status === "loading" ? null : session?.user ? (
             <>
+              {/* Notification bell */}
+              <div className="relative" ref={bellRef}>
+                <button
+                  onClick={() => setBellOpen(!bellOpen)}
+                  className="relative p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
+                  aria-label={tc.notifications}
+                >
+                  <span className="text-lg">🔔</span>
+                  {notifCount > 0 && (
+                    <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+                  )}
+                </button>
+
+                {bellOpen && (
+                  <div className="absolute right-0 mt-1 w-72 bg-white border border-gray-200 rounded-xl shadow-lg z-30 overflow-hidden">
+                    <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
+                      <span className="font-semibold text-sm text-gray-800">{tc.notifications}</span>
+                      {notifCount > 0 && (
+                        <button
+                          onClick={markAllRead}
+                          className="text-xs text-indigo-600 hover:text-indigo-800 transition-colors"
+                        >
+                          {tc.markAllRead}
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-72 overflow-y-auto">
+                      {notifItems.length === 0 ? (
+                        <p className="text-sm text-gray-400 text-center py-6">{tc.noNotifications}</p>
+                      ) : (
+                        notifItems.map((n) => (
+                          <Link
+                            key={n.id}
+                            href={`/question/${n.questionId}`}
+                            onClick={() => setBellOpen(false)}
+                            className="flex items-start gap-2 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
+                          >
+                            <span className="text-base flex-shrink-0">{n.type === "like" ? "❤️" : "💬"}</span>
+                            <div className="min-w-0">
+                              <p className="text-sm text-gray-700">
+                                <span className="font-medium">{n.actorName}</span>{" "}
+                                {getNotifText(n.type)}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                {new Date(n.createdAt).toLocaleDateString(lang === "he" ? "he-IL" : "en-US")}
+                              </p>
+                            </div>
+                          </Link>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <Link
                 href="/ask"
                 className="text-sm px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 active:bg-indigo-800 transition-colors font-semibold"

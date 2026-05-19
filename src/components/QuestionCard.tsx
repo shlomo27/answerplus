@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useState } from "react";
 import CategoryBadge from "./CategoryBadge";
 import { useLangContext } from "@/components/LangProvider";
 import { getTranslations } from "@/lib/i18n";
@@ -13,22 +14,56 @@ interface Props {
   createdAt: string;
   conclusion?: string | null;
   commentCount: number;
+  likeCount?: number;
   imageUrl?: string | null;
 }
 
 export default function QuestionCard({
-  id, text, category, type = "ai_question", authorName, createdAt, conclusion, commentCount, imageUrl,
+  id, text, category, type = "ai_question", authorName, createdAt, conclusion, commentCount, likeCount = 0, imageUrl,
 }: Props) {
   const { lang } = useLangContext();
   const t = getTranslations(lang).components;
   const locale = lang === "he" ? "he-IL" : "en-US";
   const isPost = type === "post";
 
+  const [liked, setLiked] = useState(false);
+  const [localLikeCount, setLocalLikeCount] = useState(likeCount);
+  const [liking, setLiking] = useState(false);
+
   const date = new Date(createdAt).toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
+
+  async function handleLike(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (liking) return;
+    setLiking(true);
+    // Optimistic update
+    const newLiked = !liked;
+    setLiked(newLiked);
+    setLocalLikeCount((prev) => newLiked ? prev + 1 : prev - 1);
+    try {
+      const res = await fetch(`/api/questions/${id}/like`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setLiked(data.liked);
+        setLocalLikeCount(data.count);
+      } else {
+        // Revert on error
+        setLiked(!newLiked);
+        setLocalLikeCount((prev) => newLiked ? prev - 1 : prev + 1);
+      }
+    } catch {
+      // Revert on error
+      setLiked(!newLiked);
+      setLocalLikeCount((prev) => newLiked ? prev - 1 : prev + 1);
+    } finally {
+      setLiking(false);
+    }
+  }
 
   return (
     <Link href={`/question/${id}`} className="block group active:scale-[0.99] transition-transform">
@@ -73,9 +108,20 @@ export default function QuestionCard({
             <span>·</span>
             <span>{date}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <span>💬</span>
-            <span>{commentCount}</span>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleLike}
+              className={`flex items-center gap-1 transition-colors ${liked ? "text-red-500" : "text-gray-400 hover:text-red-400"}`}
+              aria-label={t.likeCount}
+            >
+              <span>❤️</span>
+              <span>{localLikeCount}</span>
+            </button>
+            <div className="flex items-center gap-1">
+              <span>💬</span>
+              <span>{commentCount}</span>
+            </div>
           </div>
         </div>
       </div>

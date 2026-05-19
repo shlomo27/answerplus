@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { useLangContext } from "@/components/LangProvider";
 import { getTranslations } from "@/lib/i18n";
 
@@ -19,12 +20,26 @@ export default function CommentSection({ questionId, initialComments }: Props) {
   const { lang } = useLangContext();
   const t = getTranslations(lang).components;
   const locale = lang === "he" ? "he-IL" : "en-US";
+  const { data: session } = useSession();
+
+  const loggedInDefault = session?.user?.username || session?.user?.name || "";
 
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [text, setText] = useState("");
   const [author, setAuthor] = useState("");
+  const [anonymous, setAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const isLoggedIn = !!session?.user;
+
+  function getAuthorName(): string {
+    if (isLoggedIn) {
+      if (anonymous) return lang === "he" ? "אנונימי" : "Anonymous";
+      return loggedInDefault || (lang === "he" ? "אנונימי" : "Anonymous");
+    }
+    return author || (lang === "he" ? "אנונימי" : "Anonymous");
+  }
 
   async function submitComment(e: React.FormEvent) {
     e.preventDefault();
@@ -35,7 +50,7 @@ export default function CommentSection({ questionId, initialComments }: Props) {
       const res = await fetch(`/api/questions/${questionId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: text, authorName: author || (lang === "he" ? "אנונימי" : "Anonymous") }),
+        body: JSON.stringify({ content: text, authorName: getAuthorName() }),
       });
       if (!res.ok) throw new Error(t.sendError);
       const comment = await res.json();
@@ -76,14 +91,32 @@ export default function CommentSection({ questionId, initialComments }: Props) {
       </div>
 
       <form onSubmit={submitComment} className="space-y-2.5">
-        <input
-          type="text"
-          placeholder={t.namePlaceholder}
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-indigo-300"
-          disabled={loading}
-        />
+        {/* Name input: only show when not logged in */}
+        {!isLoggedIn && (
+          <input
+            type="text"
+            placeholder={t.namePlaceholder}
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            disabled={loading}
+          />
+        )}
+
+        {/* Anonymous toggle for logged-in users */}
+        {isLoggedIn && (
+          <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-gray-600">
+            <input
+              type="checkbox"
+              checked={anonymous}
+              onChange={(e) => setAnonymous(e.target.checked)}
+              className="w-4 h-4 rounded accent-indigo-600"
+              disabled={loading}
+            />
+            {t.anonymousToggle}
+          </label>
+        )}
+
         <textarea
           placeholder={t.commentPlaceholder}
           value={text}

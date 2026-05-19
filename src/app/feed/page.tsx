@@ -14,7 +14,7 @@ export default async function FeedPage({
     where: { isPublic: true, ...(category ? { category } : {}) },
     include: {
       summary: { select: { conclusion: true } },
-      _count: { select: { comments: true } },
+      _count: { select: { comments: true, likes: true } },
     },
     orderBy: { createdAt: "desc" },
     take: 50,
@@ -31,6 +31,7 @@ export default async function FeedPage({
         createdAt: q.createdAt.toISOString(),
         conclusion: q.summary?.conclusion,
         commentCount: q._count.comments,
+        likeCount: q._count.likes,
         imageUrl: q.imageUrl,
       }))}
       activeCategory={category}

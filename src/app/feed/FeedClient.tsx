@@ -17,6 +17,7 @@ interface Question {
   createdAt: string;
   conclusion?: string | null;
   commentCount: number;
+  likeCount?: number;
   imageUrl?: string | null;
 }
 
@@ -123,6 +124,7 @@ export default function FeedClient({ questions, activeCategory }: Props) {
               createdAt={q.createdAt}
               conclusion={q.conclusion}
               commentCount={q.commentCount}
+              likeCount={q.likeCount}
               imageUrl={q.imageUrl}
             />
           ))}
