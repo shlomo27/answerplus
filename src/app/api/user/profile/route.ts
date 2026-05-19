@@ -17,9 +17,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Select at least one interest" }, { status: 400 });
   }
 
+  // Find user by email (more reliable than ID which may be OAuth sub)
+  const email = session.user.email;
+  if (!email) {
+    return NextResponse.json({ error: "No email in session" }, { status: 400 });
+  }
+
   try {
+    const dbUser = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+    if (!dbUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     const existing = await prisma.user.findFirst({
-      where: { username, NOT: { id: session.user.id } },
+      where: { username, NOT: { id: dbUser.id } },
       select: { id: true },
     });
     if (existing) {
@@ -27,7 +41,7 @@ export async function POST(req: NextRequest) {
     }
 
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: dbUser.id },
       data: {
         username,
         avatarId: avatarId ?? null,
