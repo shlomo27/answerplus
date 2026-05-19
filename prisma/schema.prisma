@@ -21,6 +21,26 @@ model Question {
   responses  AIResponse[]
   summary    Summary?
   comments   Comment[]
+  likes      Like[]
+}
+
+model Like {
+  id         String   @id @default(cuid())
+  questionId String
+  userId     String
+  createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  @@unique([questionId, userId])
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String
+  questionId String
+  actorName  String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
 }
 
 model AIResponse {

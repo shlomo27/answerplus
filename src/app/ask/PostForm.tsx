@@ -34,7 +34,7 @@ export default function PostForm() {
   const [mismatch, setMismatch] = useState<MismatchDialog | null>(null);
   const [pendingSubmit, setPendingSubmit] = useState(false);
 
-  const authorName = session?.user?.name || session?.user?.email || (lang === "he" ? "אנונימי" : "Anonymous");
+  const authorName = session?.user?.username || session?.user?.name || session?.user?.email || (lang === "he" ? "אנונימי" : "Anonymous");
   const isCustom = selectedCategory === CUSTOM_VALUE;
   const effectiveCategory = isCustom ? customCategory : selectedCategory;
 

@@ -16,7 +16,7 @@ export default function AIQuestionForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const authorName = session?.user?.name || session?.user?.email || (lang === "he" ? "אנונימי" : "Anonymous");
+  const authorName = session?.user?.username || session?.user?.name || session?.user?.email || (lang === "he" ? "אנונימי" : "Anonymous");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
