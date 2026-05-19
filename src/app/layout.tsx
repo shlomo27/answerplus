@@ -11,6 +11,16 @@ import type { Lang } from "@/lib/i18n";
 export const metadata: Metadata = {
   title: "Qrowd",
   description: "Ask AI and community — get the best answer",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Qrowd",
+  },
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/icon-192.png",
+  },
 };
 
 export const viewport: Viewport = {
