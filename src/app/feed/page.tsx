@@ -26,10 +26,12 @@ export default async function FeedPage({
         id: q.id,
         text: q.text,
         category: q.category,
+        type: q.type,
         authorName: q.authorName,
         createdAt: q.createdAt.toISOString(),
         conclusion: q.summary?.conclusion,
         commentCount: q._count.comments,
+        imageUrl: q.imageUrl,
       }))}
       activeCategory={category}
     />

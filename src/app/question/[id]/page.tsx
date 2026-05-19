@@ -24,9 +24,12 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
         id: question.id,
         text: question.text,
         category: question.category,
+        type: question.type,
         isPublic: question.isPublic,
         authorName: question.authorName,
         createdAt: question.createdAt.toISOString(),
+        imageUrl: question.imageUrl,
+        videoUrl: question.videoUrl,
         responses: question.responses.map((r) => ({
           id: r.id,
           provider: r.provider,

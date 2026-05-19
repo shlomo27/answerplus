@@ -10,10 +10,12 @@ interface Question {
   id: string;
   text: string;
   category: string;
+  type: string;
   authorName: string;
   createdAt: string;
   conclusion?: string | null;
   commentCount: number;
+  imageUrl?: string | null;
 }
 
 interface Props {
@@ -83,10 +85,12 @@ export default function FeedClient({ questions, activeCategory }: Props) {
               id={q.id}
               text={q.text}
               category={q.category}
+              type={q.type}
               authorName={q.authorName}
               createdAt={q.createdAt}
               conclusion={q.conclusion}
               commentCount={q.commentCount}
+              imageUrl={q.imageUrl}
             />
           ))}
         </div>
@@ -98,7 +102,7 @@ export default function FeedClient({ questions, activeCategory }: Props) {
           className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-indigo-700 active:scale-95 transition-all font-semibold text-sm"
         >
           <span className="text-lg">+</span>
-          {lang === "he" ? "שאל שאלה" : "Ask Question"}
+          {lang === "he" ? "שאל / פרסם" : "Ask / Post"}
         </Link>
       </div>
     </div>

@@ -11,8 +11,11 @@ model Question {
   id         String      @id @default(cuid())
   text       String
   category   String
+  type       String      @default("ai_question")
   isPublic   Boolean     @default(true)
   authorName String      @default("אנונימי")
+  imageUrl   String?
+  videoUrl   String?
   createdAt  DateTime    @default(now())
   responses  AIResponse[]
   summary    Summary?

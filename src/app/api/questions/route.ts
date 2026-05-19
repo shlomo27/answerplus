@@ -25,12 +25,41 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { text, isPublic = true, authorName = "אנונימי" } = body;
+  const {
+    text,
+    type = "ai_question",
+    isPublic = true,
+    authorName = "אנונימי",
+    category: providedCategory,
+    imageUrl,
+    videoUrl,
+  } = body;
 
   if (!text || typeof text !== "string" || text.trim().length < 5) {
-    return NextResponse.json({ error: "השאלה קצרה מדי" }, { status: 400 });
+    return NextResponse.json({ error: "התוכן קצר מדי" }, { status: 400 });
   }
 
+  if (type === "post") {
+    if (!providedCategory) {
+      return NextResponse.json({ error: "חובה לבחור נושא" }, { status: 400 });
+    }
+
+    const question = await prisma.question.create({
+      data: {
+        text: text.trim(),
+        category: providedCategory,
+        type: "post",
+        isPublic,
+        authorName,
+        imageUrl: imageUrl ?? null,
+        videoUrl: videoUrl ?? null,
+      },
+    });
+
+    return NextResponse.json(question, { status: 201 });
+  }
+
+  // AI question flow
   const [responses, category] = await Promise.all([
     queryAllProviders(text.trim()),
     categorizeQuestion(text.trim()),
@@ -42,6 +71,7 @@ export async function POST(req: NextRequest) {
     data: {
       text: text.trim(),
       category,
+      type: "ai_question",
       isPublic,
       authorName,
       responses: {
