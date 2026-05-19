@@ -95,34 +95,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return true;
     },
     async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-      }
-      if (!token.id && token.email) {
+      if (user?.email) token.email = user.email;
+      // Always resolve DB user by email so we use our cuid, not the OAuth sub
+      if (token.email) {
         try {
           const dbUser = await prisma.user.findUnique({
             where: { email: token.email as string },
-          });
-          if (dbUser) token.id = dbUser.id;
-        } catch {
-          // ignore DB errors in JWT callback
-        }
-      }
-      if (token.id) {
-        try {
-          const dbUser = await prisma.user.findUnique({
-            where: { id: token.id as string },
-            select: { username: true, avatarId: true, onboarded: true, interests: true },
+            select: { id: true, username: true, avatarId: true, onboarded: true, interests: true },
           });
           if (dbUser) {
+            token.id = dbUser.id;
             token.username = dbUser.username;
             token.avatarId = dbUser.avatarId;
             token.onboarded = dbUser.onboarded;
             token.interests = dbUser.interests ? JSON.parse(dbUser.interests) : [];
           }
         } catch {
-          // ignore
+          // ignore DB errors
         }
       }
       return token;
