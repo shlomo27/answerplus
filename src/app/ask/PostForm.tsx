@@ -148,11 +148,11 @@ export default function PostForm() {
             <div className="space-y-2 mb-5">
               <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5">
                 <p className="text-xs text-gray-400 mb-0.5">{t.mismatchYours}</p>
-                <p className="font-semibold text-gray-700 text-sm">{mismatch.yourCategory}</p>
+                <p className="font-semibold text-gray-700 text-sm">{categoryLabel(mismatch.yourCategory)}</p>
               </div>
               <div className="bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-2.5">
                 <p className="text-xs text-indigo-400 mb-0.5">{t.mismatchSuggested}</p>
-                <p className="font-semibold text-indigo-700 text-sm">{mismatch.suggestedCategory}</p>
+                <p className="font-semibold text-indigo-700 text-sm">{categoryLabel(mismatch.suggestedCategory)}</p>
               </div>
             </div>
             <div className="flex gap-2">
