@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client"; // sqlite
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
