@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     const data = await res.json();
     const text = (data.content?.[0]?.text ?? "").trim();
-    const jsonMatch = text.match(/\{.*\}/s);
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return NextResponse.json({ matches: true });
 
     const result = JSON.parse(jsonMatch[0]);
