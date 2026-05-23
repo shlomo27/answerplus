@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "com.qrowd.app",
-  appName: "Qrowd",
+  appId: "com.aicrowd.app",
+  appName: "AICrowd",
   // Points to the live Railway deployment — no static build needed
   server: {
     url: "https://answerplus-production.up.railway.app",

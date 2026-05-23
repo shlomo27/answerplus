@@ -1,6 +1,6 @@
 {
-  "name": "Qrowd",
-  "short_name": "Qrowd",
+  "name": "AICrowd",
+  "short_name": "AICrowd",
   "description": "Ask questions to Claude, ChatGPT & Gemini simultaneously",
   "start_url": "/feed",
   "display": "standalone",

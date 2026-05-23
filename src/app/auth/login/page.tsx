@@ -60,7 +60,7 @@ function LoginForm() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-1.5 font-bold text-xl text-indigo-700 mb-4">
             <span>✦</span>
-            <span>Qrowd</span>
+            <span>AICrowd</span>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">{t.title}</h1>
           <p className="text-gray-500 text-sm mt-1">{t.welcome}</p>

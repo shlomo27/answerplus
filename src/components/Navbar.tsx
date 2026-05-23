@@ -7,18 +7,18 @@ import { useLangContext } from "@/components/LangProvider";
 import { getTranslations } from "@/lib/i18n";
 
 const AVATAR_URLS: Record<string, string> = {
-  robot: "https://api.dicebear.com/9.x/bottts/png?seed=qrowd-r1&backgroundColor=b6e3f4",
-  explorer: "https://api.dicebear.com/9.x/adventurer/png?seed=qrowd-a1&backgroundColor=d1f0d1",
-  cool: "https://api.dicebear.com/9.x/avataaars/png?seed=qrowd-c1&backgroundColor=fde68a",
-  ninja: "https://api.dicebear.com/9.x/pixel-art/png?seed=qrowd-n1&backgroundColor=d1d4f9",
-  scientist: "https://api.dicebear.com/9.x/adventurer/png?seed=qrowd-s2&backgroundColor=c7f2fa",
-  artist: "https://api.dicebear.com/9.x/croodles/png?seed=qrowd-ar1&backgroundColor=ffd5dc",
-  gamer: "https://api.dicebear.com/9.x/bottts/png?seed=qrowd-g1&backgroundColor=c1f4c5",
-  chef: "https://api.dicebear.com/9.x/adventurer/png?seed=qrowd-ch1&backgroundColor=fde8c8",
-  athlete: "https://api.dicebear.com/9.x/adventurer/png?seed=qrowd-sp1&backgroundColor=d4f5d4",
-  coder: "https://api.dicebear.com/9.x/bottts/png?seed=qrowd-co1&backgroundColor=e4d4f4",
-  alien: "https://api.dicebear.com/9.x/fun-emoji/png?seed=qrowd-al1&backgroundColor=d4e8ff",
-  cat: "https://api.dicebear.com/9.x/fun-emoji/png?seed=qrowd-cat&backgroundColor=fff0d4",
+  robot: "https://api.dicebear.com/9.x/bottts/png?seed=aicrowd-r1&backgroundColor=b6e3f4",
+  explorer: "https://api.dicebear.com/9.x/adventurer/png?seed=aicrowd-a1&backgroundColor=d1f0d1",
+  cool: "https://api.dicebear.com/9.x/avataaars/png?seed=aicrowd-c1&backgroundColor=fde68a",
+  ninja: "https://api.dicebear.com/9.x/pixel-art/png?seed=aicrowd-n1&backgroundColor=d1d4f9",
+  scientist: "https://api.dicebear.com/9.x/adventurer/png?seed=aicrowd-s2&backgroundColor=c7f2fa",
+  artist: "https://api.dicebear.com/9.x/croodles/png?seed=aicrowd-ar1&backgroundColor=ffd5dc",
+  gamer: "https://api.dicebear.com/9.x/bottts/png?seed=aicrowd-g1&backgroundColor=c1f4c5",
+  chef: "https://api.dicebear.com/9.x/adventurer/png?seed=aicrowd-ch1&backgroundColor=fde8c8",
+  athlete: "https://api.dicebear.com/9.x/adventurer/png?seed=aicrowd-sp1&backgroundColor=d4f5d4",
+  coder: "https://api.dicebear.com/9.x/bottts/png?seed=aicrowd-co1&backgroundColor=e4d4f4",
+  alien: "https://api.dicebear.com/9.x/fun-emoji/png?seed=aicrowd-al1&backgroundColor=d4e8ff",
+  cat: "https://api.dicebear.com/9.x/fun-emoji/png?seed=aicrowd-cat&backgroundColor=fff0d4",
 };
 
 interface NotificationItem {
@@ -107,7 +107,7 @@ export default function Navbar() {
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href={session?.user ? "/feed" : "/"} className="flex items-center gap-1.5 font-bold text-lg text-indigo-700">
           <span className="text-xl">✦</span>
-          <span>Qrowd</span>
+          <span>AICrowd</span>
         </Link>
 
         <div className="flex items-center gap-2">

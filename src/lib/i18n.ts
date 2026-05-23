@@ -56,7 +56,7 @@ export const translations = {
     },
     register: {
       title: "יצירת חשבון חדש",
-      subtitle: "הצטרף לקהילת Qrowd",
+      subtitle: "הצטרף לקהילת AICrowd",
       signUpGoogle: "הירשם עם Google",
       or: "או",
       nameLabel: "שם מלא",
@@ -72,7 +72,7 @@ export const translations = {
       errorGeneral: "שגיאה בהרשמה, נסה שוב",
     },
     onboarding: {
-      welcome: "ברוך הבא לQrowd! 🎉",
+      welcome: "ברוך הבא לAICrowd! 🎉",
       subtitle: "בוא נגדיר את הפרופיל שלך",
       step1Title: "בחר כינוי ודמות",
       step2Title: "מה מעניין אותך?",
@@ -235,7 +235,7 @@ export const translations = {
     },
     register: {
       title: "Create a New Account",
-      subtitle: "Join the Qrowd community",
+      subtitle: "Join the AICrowd community",
       signUpGoogle: "Sign up with Google",
       or: "or",
       nameLabel: "Full Name",
@@ -251,7 +251,7 @@ export const translations = {
       errorGeneral: "Registration error, please try again",
     },
     onboarding: {
-      welcome: "Welcome to Qrowd! 🎉",
+      welcome: "Welcome to AICrowd! 🎉",
       subtitle: "Let's set up your profile",
       step1Title: "Choose a nickname & avatar",
       step2Title: "What are you interested in?",

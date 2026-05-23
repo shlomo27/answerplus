@@ -56,7 +56,7 @@ function VerifyContent() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-1.5 font-bold text-xl text-indigo-700 mb-4">
             <span>✦</span>
-            <span>Qrowd</span>
+            <span>AICrowd</span>
           </Link>
         </div>
 

@@ -35,7 +35,7 @@ export default function LandingPage() {
       <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto border-b border-gray-100">
         <div className="flex items-center gap-2 font-bold text-xl text-indigo-600">
           <span className="text-2xl">✦</span>
-          <span>Qrowd</span>
+          <span>AICrowd</span>
         </div>
         <div className="flex items-center gap-3">
           {/* Language toggle */}
@@ -64,7 +64,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <div className="flex flex-col items-center justify-center px-4 pt-10 pb-8 text-center">
         <h1 className="text-6xl sm:text-7xl font-black mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight">
-          Qrowd
+          AICrowd
         </h1>
         <p className="text-lg sm:text-xl text-gray-600 mb-2 max-w-lg">
           {t.tagline}
@@ -169,7 +169,7 @@ export default function LandingPage() {
             <path id="path-chatgpt"   d="M300,200 L500,200"  fill="none" />
             <path id="path-community" d="M300,200 L300,340"  fill="none" />
 
-            {/* Center node – Qrowd */}
+            {/* Center node – AICrowd */}
             <circle cx="300" cy="200" r="38" fill="#6366f1" className="center-node-pulse" />
             <text x="300" y="196" textAnchor="middle" dominantBaseline="middle" fill="white" fontSize="22" fontWeight="900" fontFamily="system-ui">Q</text>
             <text x="300" y="214" textAnchor="middle" dominantBaseline="middle" fill="rgba(255,255,255,0.7)" fontSize="8" fontWeight="600" fontFamily="system-ui" letterSpacing="1">QROWD</text>

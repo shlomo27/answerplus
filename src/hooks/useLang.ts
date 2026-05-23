@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import type { Lang } from "@/lib/i18n";
 
-const STORAGE_KEY = "qrowd-lang";
+const STORAGE_KEY = "aicrowd-lang";
 
 export function useLang(initialLang: Lang = "en"): [Lang, (lang: Lang) => void] {
   const [lang, setLangState] = useState<Lang>(initialLang);

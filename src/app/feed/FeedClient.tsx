@@ -43,7 +43,7 @@ export default function FeedClient({ questions, activeCategory }: Props) {
   return (
     <div className="pb-24">
       <div className="mb-6 text-center">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Qrowd</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">AICrowd</h1>
         <p className="text-gray-500 text-sm sm:text-base">{t.subtitle}</p>
       </div>
 
