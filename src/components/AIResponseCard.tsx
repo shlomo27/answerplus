@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { PROVIDER_CONFIG } from "@/types";
 import { useLangContext } from "@/components/LangProvider";
 import { getTranslations } from "@/lib/i18n";
@@ -60,6 +61,11 @@ export default function AIResponseCard({ provider, content, error, questionId, r
             {t.error}
           </span>
         )}
+        {!currentError && !open && (
+          <span className="text-xs text-gray-400 hidden sm:inline">
+            {lang === "he" ? "לחץ לצפייה" : "Click to read"}
+          </span>
+        )}
         <span className={`ml-1 text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}>
           ▾
         </span>
@@ -67,11 +73,15 @@ export default function AIResponseCard({ provider, content, error, questionId, r
 
       {open && (
         <div className="px-4 pb-4">
-          <p className={`text-sm leading-relaxed whitespace-pre-wrap ${currentError ? "text-red-500" : "text-gray-700"}`}>
-            {currentError
-              ? (lang === "he" ? "השירות אינו זמין כרגע. נסה שוב מאוחר יותר." : "This service is temporarily unavailable. Please try again later.")
-              : currentContent}
-          </p>
+          {currentError ? (
+            <p className="text-sm text-red-500">
+              {lang === "he" ? "השירות אינו זמין כרגע. נסה שוב מאוחר יותר." : "This service is temporarily unavailable. Please try again later."}
+            </p>
+          ) : (
+            <div className="prose prose-sm max-w-none text-gray-700">
+              <ReactMarkdown>{currentContent}</ReactMarkdown>
+            </div>
+          )}
           {currentError && questionId && responseId && (
             <button
               onClick={handleRetry}
