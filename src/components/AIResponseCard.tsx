@@ -43,7 +43,9 @@ export default function AIResponseCard({ provider, content, error }: Props) {
       {open && (
         <div className="px-4 pb-4">
           <p className={`text-sm leading-relaxed whitespace-pre-wrap ${error ? "text-red-500" : "text-gray-700"}`}>
-            {content}
+            {error
+              ? (lang === "he" ? "השירות אינו זמין כרגע. נסה שוב מאוחר יותר." : "This service is temporarily unavailable. Please try again later.")
+              : content}
           </p>
         </div>
       )}
