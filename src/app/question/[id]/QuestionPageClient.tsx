@@ -204,7 +204,7 @@ export default function QuestionPageClient({ question }: Props) {
           </h2>
           <div className="grid gap-3">
             {question.responses.map((r) => (
-              <AIResponseCard key={r.id} provider={r.provider} content={r.content} error={r.error} />
+              <AIResponseCard key={r.id} provider={r.provider} content={r.content} error={r.error} questionId={question.id} responseId={r.id} />
             ))}
           </div>
         </div>

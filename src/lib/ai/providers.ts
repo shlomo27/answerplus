@@ -74,6 +74,12 @@ async function queryGemini(question: string): Promise<ProviderResult> {
   }
 }
 
+export async function querySingleProvider(question: string, provider: ProviderResult["provider"]): Promise<ProviderResult> {
+  if (provider === "claude") return queryClaude(question);
+  if (provider === "chatgpt") return queryChatGPT(question);
+  return queryGemini(question);
+}
+
 export async function queryAllProviders(question: string): Promise<ProviderResult[]> {
   const results = await Promise.allSettled([
     queryClaude(question),
