@@ -62,8 +62,8 @@ export default function AIResponseCard({ provider, content, error, questionId, r
           </span>
         )}
         {!currentError && !open && (
-          <span className="text-xs text-gray-400 hidden sm:inline">
-            {lang === "he" ? "לחץ לצפייה" : "Click to read"}
+          <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-full hidden sm:inline">
+            {lang === "he" ? "לחץ לצפייה ←" : "Click to read →"}
           </span>
         )}
         <span className={`ml-1 text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}>
