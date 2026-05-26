@@ -7,19 +7,23 @@ export interface SummaryResult {
 
 export async function generateSummary(
   question: string,
-  responses: ProviderResult[]
+  responses: ProviderResult[],
+  lang: "he" | "en" = "en"
 ): Promise<SummaryResult> {
   try {
     const validResponses = responses.filter((r) => !r.error);
     if (validResponses.length === 0) {
-      return { content: "לא התקבלו תשובות מה-AI.", conclusion: "לא ניתן לסכם." };
+      return lang === "he"
+        ? { content: "לא התקבלו תשובות מה-AI.", conclusion: "לא ניתן לסכם." }
+        : { content: "No AI responses received.", conclusion: "Unable to summarize." };
     }
 
     const responsesText = validResponses
       .map((r) => `**${r.provider.toUpperCase()}:**\n${r.content}`)
       .join("\n\n---\n\n");
 
-    const prompt = `השאלה שנשאלה: "${question}"
+    const prompt = lang === "he"
+      ? `השאלה שנשאלה: "${question}"
 
 להלן תשובות ממערכות AI שונות:
 
@@ -33,6 +37,21 @@ ${responsesText}
 {
   "content": "הסיכום כאן",
   "conclusion": "המסקנה כאן"
+}`
+      : `The question asked: "${question}"
+
+Below are answers from different AI systems:
+
+${responsesText}
+
+Please:
+1. Write a brief summary (2-3 sentences) of the common points and differences between the answers
+2. Write one clear and focused conclusion (one or two sentences) representing the best answer
+
+Reply in JSON format only:
+{
+  "content": "summary here",
+  "conclusion": "conclusion here"
 }`;
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -50,7 +69,9 @@ ${responsesText}
     });
 
     if (!res.ok) {
-      return { content: "שגיאה ביצירת הסיכום.", conclusion: "לא ניתן לסכם." };
+      return lang === "he"
+        ? { content: "שגיאה ביצירת הסיכום.", conclusion: "לא ניתן לסכם." }
+        : { content: "Error generating summary.", conclusion: "Unable to summarize." };
     }
 
     const data = await res.json();
@@ -63,6 +84,8 @@ ${responsesText}
 
     return { content: text, conclusion: "" };
   } catch {
-    return { content: "שגיאה ביצירת הסיכום.", conclusion: "לא ניתן לסכם." };
+    return lang === "he"
+      ? { content: "שגיאה ביצירת הסיכום.", conclusion: "לא ניתן לסכם." }
+      : { content: "Error generating summary.", conclusion: "Unable to summarize." };
   }
 }

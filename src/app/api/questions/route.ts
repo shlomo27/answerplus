@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
     category: providedCategory,
     imageUrl,
     videoUrl,
+    lang = "en",
   } = body;
 
   if (!text || typeof text !== "string" || text.trim().length < 5) {
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
     categorizeQuestion(text.trim()),
   ]);
 
-  const summary = await generateSummary(text.trim(), responses);
+  const summary = await generateSummary(text.trim(), responses, lang === "he" ? "he" : "en");
 
   const question = await prisma.question.create({
     data: {

@@ -30,7 +30,7 @@ export default function AIQuestionForm() {
       const res = await fetch("/api/questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, type: "ai_question", isPublic, authorName }),
+        body: JSON.stringify({ text, type: "ai_question", isPublic, authorName, lang }),
       });
       if (!res.ok) {
         const err = await res.json();
