@@ -3,8 +3,11 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "AnswerPlus – השוואת AI",
-  description: "שאל שאלה וקבל תשובות מ-Claude, ChatGPT וGemini בבת אחת",
+  title: "AnswerPlus – AI Comparison",
+  description: "Ask a question and get answers from Claude, ChatGPT and Gemini at once",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export const viewport: Viewport = {
