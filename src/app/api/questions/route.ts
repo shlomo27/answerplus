@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { queryAllProviders } from "@/lib/ai/providers";
 import { generateSummary } from "@/lib/ai/summarize";
 import { categorizeQuestion } from "@/lib/ai/categorize";
+import { auth } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   const category = req.nextUrl.searchParams.get("category");
@@ -24,13 +25,46 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await auth();
+  const userId = session?.user?.id ?? null;
+
   const body = await req.json();
-  const { text, isPublic = true, authorName = "אנונימי" } = body;
+  const {
+    text,
+    type = "ai_question",
+    isPublic = true,
+    authorName = "אנונימי",
+    category: providedCategory,
+    imageUrl,
+    videoUrl,
+  } = body;
 
   if (!text || typeof text !== "string" || text.trim().length < 5) {
-    return NextResponse.json({ error: "השאלה קצרה מדי" }, { status: 400 });
+    return NextResponse.json({ error: "התוכן קצר מדי" }, { status: 400 });
   }
 
+  if (type === "post") {
+    if (!providedCategory) {
+      return NextResponse.json({ error: "חובה לבחור נושא" }, { status: 400 });
+    }
+
+    const question = await prisma.question.create({
+      data: {
+        text: text.trim(),
+        category: providedCategory,
+        type: "post",
+        isPublic,
+        authorName,
+        userId,
+        imageUrl: imageUrl ?? null,
+        videoUrl: videoUrl ?? null,
+      },
+    });
+
+    return NextResponse.json(question, { status: 201 });
+  }
+
+  // AI question flow
   const [responses, category] = await Promise.all([
     queryAllProviders(text.trim()),
     categorizeQuestion(text.trim()),
@@ -42,8 +76,10 @@ export async function POST(req: NextRequest) {
     data: {
       text: text.trim(),
       category,
+      type: "ai_question",
       isPublic,
       authorName,
+      userId,
       responses: {
         create: responses.map((r) => ({
           provider: r.provider,

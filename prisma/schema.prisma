@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -11,12 +11,36 @@ model Question {
   id         String      @id @default(cuid())
   text       String
   category   String
+  type       String      @default("ai_question")
   isPublic   Boolean     @default(true)
   authorName String      @default("אנונימי")
+  userId     String?
+  imageUrl   String?
+  videoUrl   String?
   createdAt  DateTime    @default(now())
   responses  AIResponse[]
   summary    Summary?
   comments   Comment[]
+  likes      Like[]
+}
+
+model Like {
+  id         String   @id @default(cuid())
+  questionId String
+  userId     String
+  createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  @@unique([questionId, userId])
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String
+  questionId String
+  actorName  String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
 }
 
 model AIResponse {
@@ -39,10 +63,66 @@ model Summary {
 }
 
 model Comment {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   questionId String
   authorName String
   content    String
-  createdAt  DateTime @default(now())
-  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  parentId   String?
+  userId     String?
+  createdAt  DateTime  @default(now())
+  question   Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  parent     Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies    Comment[] @relation("CommentReplies")
+}
+
+// NextAuth models
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  username      String?   @unique
+  avatarId      String?
+  interests     String?
+  onboarded     Boolean   @default(false)
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
