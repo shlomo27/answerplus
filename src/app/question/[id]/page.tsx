@@ -18,6 +18,15 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
 
   if (!question) notFound();
 
+  const followUps = await prisma.question.findMany({
+    where: { parentQuestionId: id },
+    include: {
+      responses: { orderBy: { createdAt: "asc" } },
+      summary: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
   return (
     <QuestionPageClient
       question={{
@@ -49,6 +58,20 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
           userId: c.userId ?? null,
         })),
       }}
+      initialFollowUps={followUps.map((f) => ({
+        id: f.id,
+        text: f.text,
+        createdAt: f.createdAt.toISOString(),
+        responses: f.responses.map((r) => ({
+          id: r.id,
+          provider: r.provider,
+          content: r.content,
+          error: r.error,
+        })),
+        summary: f.summary
+          ? { content: f.summary.content, conclusion: f.summary.conclusion }
+          : null,
+      }))}
     />
   );
 }

@@ -10,6 +10,21 @@ import CategoryBadge from "@/components/CategoryBadge";
 import { useLangContext } from "@/components/LangProvider";
 import { getTranslations } from "@/lib/i18n";
 
+interface AIResp {
+  id: string;
+  provider: string;
+  content: string;
+  error: boolean;
+}
+
+interface FollowUp {
+  id: string;
+  text: string;
+  createdAt: string;
+  responses: AIResp[];
+  summary: { content: string; conclusion: string } | null;
+}
+
 interface Props {
   question: {
     id: string;
@@ -22,10 +37,11 @@ interface Props {
     createdAt: string;
     imageUrl?: string | null;
     videoUrl?: string | null;
-    responses: { id: string; provider: string; content: string; error: boolean }[];
+    responses: AIResp[];
     summary: { content: string; conclusion: string } | null;
     comments: { id: string; authorName: string; content: string; createdAt: string; parentId?: string | null; userId?: string | null }[];
   };
+  initialFollowUps: FollowUp[];
 }
 
 function getYouTubeEmbedUrl(url: string): string | null {
@@ -46,7 +62,7 @@ function getYouTubeEmbedUrl(url: string): string | null {
   return null;
 }
 
-export default function QuestionPageClient({ question }: Props) {
+export default function QuestionPageClient({ question, initialFollowUps }: Props) {
   const { lang } = useLangContext();
   const t = getTranslations(lang).question;
   const locale = lang === "he" ? "he-IL" : "en-US";
@@ -55,6 +71,11 @@ export default function QuestionPageClient({ question }: Props) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const [followUps, setFollowUps] = useState<FollowUp[]>(initialFollowUps);
+  const [followUpText, setFollowUpText] = useState("");
+  const [submittingFollowUp, setSubmittingFollowUp] = useState(false);
+  const [showFollowUpInput, setShowFollowUpInput] = useState(false);
 
   const isOwner = session?.user?.id && question.userId && session.user.id === question.userId;
 
@@ -69,6 +90,64 @@ export default function QuestionPageClient({ question }: Props) {
     } finally {
       setDeleting(false);
       setConfirmDelete(false);
+    }
+  }
+
+  async function handleFollowUpSubmit() {
+    if (!followUpText.trim() || followUpText.trim().length < 3) return;
+    setSubmittingFollowUp(true);
+
+    // Build conversation history from root question + all follow-ups so far
+    const conversationHistory = [
+      {
+        question: question.text,
+        responses: question.responses.map((r) => ({
+          provider: r.provider,
+          content: r.content,
+          error: r.error,
+        })),
+      },
+      ...followUps.map((f) => ({
+        question: f.text,
+        responses: f.responses.map((r) => ({
+          provider: r.provider,
+          content: r.content,
+          error: r.error,
+        })),
+      })),
+    ];
+
+    try {
+      const res = await fetch("/api/questions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          text: followUpText.trim(),
+          parentQuestionId: question.id,
+          category: question.category,
+          isPublic: question.isPublic,
+          authorName: session?.user?.name ?? "אנונימי",
+          conversationHistory,
+        }),
+      });
+
+      if (res.ok) {
+        const newQ = await res.json();
+        setFollowUps((prev) => [
+          ...prev,
+          {
+            id: newQ.id,
+            text: newQ.text,
+            createdAt: newQ.createdAt,
+            responses: newQ.responses ?? [],
+            summary: newQ.summary ?? null,
+          },
+        ]);
+        setFollowUpText("");
+        setShowFollowUpInput(false);
+      }
+    } finally {
+      setSubmittingFollowUp(false);
     }
   }
 
@@ -207,6 +286,86 @@ export default function QuestionPageClient({ question }: Props) {
               <AIResponseCard key={r.id} provider={r.provider} content={r.content} error={r.error} />
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Follow-up thread */}
+      {!isPost && (
+        <div className="mb-4">
+          {/* Existing follow-ups */}
+          {followUps.map((fu, idx) => (
+            <div key={fu.id} className="relative mb-4">
+              {/* Thread connector line */}
+              <div className="absolute left-5 -top-4 bottom-0 w-0.5 bg-indigo-100" style={{ top: "-1rem" }} />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-2 pl-1">
+                  <div className="w-2 h-2 rounded-full bg-indigo-400 flex-shrink-0" />
+                  <span className="text-xs text-gray-400 font-medium">
+                    {lang === "he" ? `שאלת המשך ${idx + 1}` : `Follow-up ${idx + 1}`}
+                  </span>
+                </div>
+                <div className="ml-4 bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-3">
+                  <p className="text-sm font-semibold text-gray-800">{fu.text}</p>
+                </div>
+                {fu.summary && (
+                  <div className="ml-4 mb-3">
+                    <SummaryCard content={fu.summary.content} conclusion={fu.summary.conclusion} />
+                  </div>
+                )}
+                {fu.responses.length > 0 && (
+                  <div className="ml-4 grid gap-2">
+                    {fu.responses.map((r) => (
+                      <AIResponseCard key={r.id} provider={r.provider} content={r.content} error={r.error} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* Add follow-up */}
+          {!showFollowUpInput ? (
+            <button
+              onClick={() => setShowFollowUpInput(true)}
+              className="w-full flex items-center gap-2 justify-center py-3 border-2 border-dashed border-indigo-200 rounded-2xl text-sm text-indigo-500 hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50 transition-colors font-medium"
+            >
+              <span className="text-lg">💬</span>
+              {lang === "he" ? "המשך את השיחה — שאל שאלת המשך" : "Continue the conversation — ask a follow-up"}
+            </button>
+          ) : (
+            <div className="border border-indigo-200 rounded-2xl p-4 bg-indigo-50">
+              <p className="text-xs font-semibold text-indigo-500 mb-2">
+                {lang === "he" ? "שאלת המשך" : "Follow-up question"}
+              </p>
+              <textarea
+                value={followUpText}
+                onChange={(e) => setFollowUpText(e.target.value)}
+                placeholder={lang === "he" ? "כתוב את שאלת ההמשך שלך..." : "Type your follow-up question..."}
+                className="w-full bg-white border border-indigo-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+                rows={3}
+                disabled={submittingFollowUp}
+                autoFocus
+              />
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={() => { setShowFollowUpInput(false); setFollowUpText(""); }}
+                  className="flex-1 py-2 border border-gray-200 bg-white rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                  disabled={submittingFollowUp}
+                >
+                  {lang === "he" ? "ביטול" : "Cancel"}
+                </button>
+                <button
+                  onClick={handleFollowUpSubmit}
+                  disabled={submittingFollowUp || followUpText.trim().length < 3}
+                  className="flex-1 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                >
+                  {submittingFollowUp
+                    ? (lang === "he" ? "שולח..." : "Sending...")
+                    : (lang === "he" ? "שלח לכל ה-AI" : "Ask all AIs")}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
