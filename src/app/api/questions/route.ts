@@ -1,4 +1,3 @@
-// v2
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { queryAllProviders } from "@/lib/ai/providers";
@@ -68,7 +67,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(question, { status: 201 });
   }
 
-  // AI question flow
   const isFollowUp = !!parentQuestionId;
 
   const [responses, category] = await Promise.all([
