@@ -1,0 +1,111 @@
+workflows:
+
+  android-release:
+    name: Android Release
+    max_build_duration: 60
+    environment:
+      node: 22
+      java: 17
+      groups:
+        - google_play
+      vars:
+        PACKAGE_NAME: "com.aicrowd.app"
+    scripts:
+      - name: Install dependencies
+        script: npm install
+
+      - name: Add Android platform
+        script: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+
+      - name: Sync Capacitor
+        script: npx cap sync android
+
+      - name: Add google-services.json
+        script: |
+          echo $GOOGLE_SERVICES_JSON | base64 --decode > android/app/google-services.json
+
+      - name: Build Android AAB
+        script: |
+          cd android
+          ./gradlew bundleRelease
+
+      - name: Sign AAB
+        script: |
+          jarsigner \
+            -keystore $CM_KEYSTORE_PATH \
+            -storepass $CM_KEYSTORE_PASSWORD \
+            -keypass $CM_KEY_PASSWORD \
+            -signedjar android/app/build/outputs/bundle/release/app-release-signed.aab \
+            android/app/build/outputs/bundle/release/app-release.aab \
+            $CM_KEY_ALIAS
+
+    artifacts:
+      - android/app/build/outputs/bundle/release/app-release-signed.aab
+
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+
+  ios-release:
+    name: iOS Release
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: 22
+      xcode: latest
+      cocoapods: default
+      groups:
+        - app_store_connect
+      vars:
+        BUNDLE_ID: "com.aicrowd.app"
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+    scripts:
+      - name: Install dependencies
+        script: npm install
+
+      - name: Add iOS platform
+        script: |
+          if [ ! -d "ios" ]; then
+            npx cap add ios
+          fi
+
+      - name: Sync Capacitor
+        script: npx cap sync ios
+
+      - name: Add GoogleService-Info.plist
+        script: |
+          echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/App/App/GoogleService-Info.plist
+
+      - name: Install CocoaPods
+        script: |
+          cd ios/App
+          pod install
+
+      - name: Set up code signing
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files $BUNDLE_ID \
+            --type IOS_APP_STORE \
+            --create
+          keychain add-certificates
+
+      - name: Build iOS IPA
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true

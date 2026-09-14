@@ -78,6 +78,14 @@ model Comment {
   replies    Comment[] @relation("CommentReplies")
 }
 
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+}
+
 model PushSubscription {
   id        String   @id @default(cuid())
   userId    String
@@ -96,7 +104,7 @@ model User {
   image         String?
   password      String?
   username      String?   @unique
-  avatarId      String?
+  avatarId      String?  
   interests     String?
   onboarded     Boolean   @default(false)
   accounts      Account[]
