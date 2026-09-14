@@ -78,6 +78,15 @@ model Comment {
   replies    Comment[] @relation("CommentReplies")
 }
 
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
+
 // NextAuth models
 model User {
   id            String    @id @default(cuid())
