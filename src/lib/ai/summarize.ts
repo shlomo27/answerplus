@@ -7,23 +7,19 @@ export interface SummaryResult {
 
 export async function generateSummary(
   question: string,
-  responses: ProviderResult[],
-  lang: "he" | "en" = "en"
+  responses: ProviderResult[]
 ): Promise<SummaryResult> {
   try {
     const validResponses = responses.filter((r) => !r.error);
     if (validResponses.length === 0) {
-      return lang === "he"
-        ? { content: "לא התקבלו תשובות מה-AI.", conclusion: "לא ניתן לסכם." }
-        : { content: "No AI responses received.", conclusion: "Unable to summarize." };
+      return { content: "לא התקבלו תשובות מה-AI.", conclusion: "לא ניתן לסכם." };
     }
 
     const responsesText = validResponses
       .map((r) => `**${r.provider.toUpperCase()}:**\n${r.content}`)
       .join("\n\n---\n\n");
 
-    const prompt = lang === "he"
-      ? `השאלה שנשאלה: "${question}"
+    const prompt = `השאלה שנשאלה: "${question}"
 
 להלן תשובות ממערכות AI שונות:
 
@@ -33,25 +29,12 @@ ${responsesText}
 1. כתוב סיכום קצר (2-3 משפטים) של הנקודות המשותפות והשונות בין התשובות
 2. כתוב מסקנה אחת ברורה וממוקדת (משפט אחד או שניים) שמייצגת את התשובה הטובה ביותר
 
+חשוב מאוד: כתוב את הסיכום והמסקנה בעברית בלבד, ללא קשר לשפת התשובות שקיבלת.
+
 ענה בפורמט JSON בלבד:
 {
   "content": "הסיכום כאן",
   "conclusion": "המסקנה כאן"
-}`
-      : `The question asked: "${question}"
-
-Below are answers from different AI systems:
-
-${responsesText}
-
-Please:
-1. Write a brief summary (2-3 sentences) of the common points and differences between the answers
-2. Write one clear and focused conclusion (one or two sentences) representing the best answer
-
-Reply in JSON format only:
-{
-  "content": "summary here",
-  "conclusion": "conclusion here"
 }`;
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -69,9 +52,7 @@ Reply in JSON format only:
     });
 
     if (!res.ok) {
-      return lang === "he"
-        ? { content: "שגיאה ביצירת הסיכום.", conclusion: "לא ניתן לסכם." }
-        : { content: "Error generating summary.", conclusion: "Unable to summarize." };
+      return { content: "שגיאה ביצירת הסיכום.", conclusion: "לא ניתן לסכם." };
     }
 
     const data = await res.json();
@@ -84,8 +65,6 @@ Reply in JSON format only:
 
     return { content: text, conclusion: "" };
   } catch {
-    return lang === "he"
-      ? { content: "שגיאה ביצירת הסיכום.", conclusion: "לא ניתן לסכם." }
-      : { content: "Error generating summary.", conclusion: "Unable to summarize." };
+    return { content: "שגיאה ביצירת הסיכום.", conclusion: "לא ניתן לסכם." };
   }
 }
