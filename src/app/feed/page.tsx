@@ -11,7 +11,7 @@ export default async function FeedPage({
   const { category } = await searchParams;
 
   const questions = await prisma.question.findMany({
-    where: { isPublic: true, ...(category ? { category } : {}) },
+    where: { isPublic: true, parentQuestionId: null, ...(category ? { category } : {}) },
     include: {
       summary: { select: { conclusion: true } },
       _count: { select: { comments: true, likes: true } },
