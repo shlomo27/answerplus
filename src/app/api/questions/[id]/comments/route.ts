@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { sendPushToUser } from "@/lib/push";
 
 export async function POST(
   req: NextRequest,
@@ -56,6 +57,11 @@ export async function POST(
       await prisma.notification.create({
         data: { userId: question.userId, type: "comment", questionId: id, actorName: authorName },
       });
+      sendPushToUser(question.userId, {
+        title: "תגובה חדשה על השאלה שלך",
+        body: `${authorName} הגיב: "${content.trim().slice(0, 60)}"`,
+        url: `/question/${id}`,
+      }).catch(() => {});
     }
 
     return NextResponse.json(comment, { status: 201 });

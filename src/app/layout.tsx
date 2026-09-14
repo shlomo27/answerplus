@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import SessionProvider from "@/components/SessionProvider";
 import { LangProvider } from "@/components/LangProvider";
 import OnboardingGuard from "@/components/OnboardingGuard";
+import PushSetup from "@/components/PushSetup";
 import { headers } from "next/headers";
 import type { Lang } from "@/lib/i18n";
 
@@ -46,6 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <SessionProvider>
           <LangProvider initialLang={defaultLang}>
             <OnboardingGuard />
+            <PushSetup />
             <Navbar />
             <main className="max-w-5xl mx-auto px-4 py-5">{children}</main>
           </LangProvider>
