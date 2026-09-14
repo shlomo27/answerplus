@@ -115,6 +115,13 @@ async function queryGemini(question: string, history: ConversationTurn[] = []): 
   }
 }
 
+export async function querySingleProvider(question: string, provider: string): Promise<ProviderResult> {
+  if (provider === "claude") return queryClaude(question);
+  if (provider === "chatgpt") return queryChatGPT(question);
+  if (provider === "gemini") return queryGemini(question);
+  return { provider: "claude", content: "ספק לא מוכר", error: true };
+}
+
 export async function queryAllProviders(question: string, history: ConversationTurn[] = []): Promise<ProviderResult[]> {
   const results = await Promise.allSettled([
     queryClaude(question, history),
