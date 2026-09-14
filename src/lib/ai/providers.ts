@@ -6,8 +6,25 @@ export interface ProviderResult {
   error: boolean;
 }
 
-async function queryClaude(question: string): Promise<ProviderResult> {
+export interface ConversationTurn {
+  question: string;
+  responses: { provider: string; content: string; error: boolean }[];
+}
+
+async function queryClaude(question: string, history: ConversationTurn[] = []): Promise<ProviderResult> {
   try {
+    const messages: { role: "user" | "assistant"; content: string }[] = [];
+    for (const turn of history) {
+      const prev = turn.responses.find((r) => r.provider === "claude");
+      messages.push({ role: "user", content: turn.question });
+      if (prev && !prev.error) {
+        messages.push({ role: "assistant", content: prev.content });
+      } else {
+        messages.push({ role: "assistant", content: "לא הצלחתי לענות על שאלה זו." });
+      }
+    }
+    messages.push({ role: "user", content: question });
+
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -18,7 +35,7 @@ async function queryClaude(question: string): Promise<ProviderResult> {
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 1024,
-        messages: [{ role: "user", content: question }],
+        messages,
       }),
     });
     if (!res.ok) {
@@ -33,12 +50,24 @@ async function queryClaude(question: string): Promise<ProviderResult> {
   }
 }
 
-async function queryChatGPT(question: string): Promise<ProviderResult> {
+async function queryChatGPT(question: string, history: ConversationTurn[] = []): Promise<ProviderResult> {
   try {
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const messages: { role: "user" | "assistant"; content: string }[] = [];
+    for (const turn of history) {
+      const prev = turn.responses.find((r) => r.provider === "chatgpt");
+      messages.push({ role: "user", content: turn.question });
+      if (prev && !prev.error) {
+        messages.push({ role: "assistant", content: prev.content });
+      } else {
+        messages.push({ role: "assistant", content: "I was unable to answer this question." });
+      }
+    }
+    messages.push({ role: "user", content: question });
+
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [{ role: "user", content: question }],
+      messages,
       max_tokens: 1024,
     });
     return {
@@ -51,15 +80,27 @@ async function queryChatGPT(question: string): Promise<ProviderResult> {
   }
 }
 
-async function queryGemini(question: string): Promise<ProviderResult> {
+async function queryGemini(question: string, history: ConversationTurn[] = []): Promise<ProviderResult> {
   try {
     const apiKey = process.env.GOOGLE_AI_API_KEY ?? "";
+    const contents: { role: string; parts: { text: string }[] }[] = [];
+    for (const turn of history) {
+      const prev = turn.responses.find((r) => r.provider === "gemini");
+      contents.push({ role: "user", parts: [{ text: turn.question }] });
+      if (prev && !prev.error) {
+        contents.push({ role: "model", parts: [{ text: prev.content }] });
+      } else {
+        contents.push({ role: "model", parts: [{ text: "I was unable to answer this question." }] });
+      }
+    }
+    contents.push({ role: "user", parts: [{ text: question }] });
+
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: question }] }] }),
+        body: JSON.stringify({ contents }),
       }
     );
     if (!res.ok) {
@@ -74,17 +115,11 @@ async function queryGemini(question: string): Promise<ProviderResult> {
   }
 }
 
-export async function querySingleProvider(question: string, provider: ProviderResult["provider"]): Promise<ProviderResult> {
-  if (provider === "claude") return queryClaude(question);
-  if (provider === "chatgpt") return queryChatGPT(question);
-  return queryGemini(question);
-}
-
-export async function queryAllProviders(question: string): Promise<ProviderResult[]> {
+export async function queryAllProviders(question: string, history: ConversationTurn[] = []): Promise<ProviderResult[]> {
   const results = await Promise.allSettled([
-    queryClaude(question),
-    queryChatGPT(question),
-    queryGemini(question),
+    queryClaude(question, history),
+    queryChatGPT(question, history),
+    queryGemini(question, history),
   ]);
 
   return results.map((r, i) => {

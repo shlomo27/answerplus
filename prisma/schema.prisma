@@ -8,20 +8,23 @@ datasource db {
 }
 
 model Question {
-  id         String      @id @default(cuid())
-  text       String
-  category   String
-  type       String      @default("ai_question")
-  isPublic   Boolean     @default(true)
-  authorName String      @default("אנונימי")
-  userId     String?
-  imageUrl   String?
-  videoUrl   String?
-  createdAt  DateTime    @default(now())
-  responses  AIResponse[]
-  summary    Summary?
-  comments   Comment[]
-  likes      Like[]
+  id               String      @id @default(cuid())
+  text             String
+  category         String
+  type             String      @default("ai_question")
+  isPublic         Boolean     @default(true)
+  authorName       String      @default("אנונימי")
+  userId           String?
+  imageUrl         String?
+  videoUrl         String?
+  createdAt        DateTime    @default(now())
+  parentQuestionId String?
+  parent           Question?   @relation("QuestionThread", fields: [parentQuestionId], references: [id], onDelete: Cascade)
+  followUps        Question[]  @relation("QuestionThread")
+  responses        AIResponse[]
+  summary          Summary?
+  comments         Comment[]
+  likes            Like[]
 }
 
 model Like {

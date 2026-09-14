@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
     category: providedCategory,
     imageUrl,
     videoUrl,
-    lang = "en",
+    parentQuestionId,
+    conversationHistory = [],
   } = body;
 
   if (!text || typeof text !== "string" || text.trim().length < 5) {
@@ -66,12 +67,14 @@ export async function POST(req: NextRequest) {
   }
 
   // AI question flow
+  const isFollowUp = !!parentQuestionId;
+
   const [responses, category] = await Promise.all([
-    queryAllProviders(text.trim()),
-    categorizeQuestion(text.trim()),
+    queryAllProviders(text.trim(), conversationHistory),
+    isFollowUp ? Promise.resolve(providedCategory ?? "general") : categorizeQuestion(text.trim()),
   ]);
 
-  const summary = await generateSummary(text.trim(), responses, lang === "he" ? "he" : "en");
+  const summary = await generateSummary(text.trim(), responses);
 
   const question = await prisma.question.create({
     data: {
@@ -81,6 +84,7 @@ export async function POST(req: NextRequest) {
       isPublic,
       authorName,
       userId,
+      ...(parentQuestionId ? { parentQuestionId } : {}),
       responses: {
         create: responses.map((r) => ({
           provider: r.provider,
