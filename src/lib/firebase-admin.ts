@@ -1,22 +1,22 @@
-import admin from "firebase-admin";
+import admin, { type App } from "firebase-admin";
 
-let app: admin.app.App | null = null;
+let firebaseApp: App | null = null;
 
-export function getFirebaseAdmin(): admin.app.App | null {
-  if (app) return app;
+export function getFirebaseAdmin(): App | null {
+  if (firebaseApp) return firebaseApp;
 
   const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
   if (!serviceAccount) return null;
 
   try {
     if (!admin.apps.length) {
-      app = admin.initializeApp({
+      firebaseApp = admin.initializeApp({
         credential: admin.credential.cert(JSON.parse(serviceAccount)),
       });
     } else {
-      app = admin.apps[0]!;
+      firebaseApp = admin.apps[0]!;
     }
-    return app;
+    return firebaseApp;
   } catch {
     return null;
   }
@@ -26,10 +26,10 @@ export async function sendFCMPush(
   tokens: string[],
   payload: { title: string; body: string; url: string }
 ) {
-  const firebaseApp = getFirebaseAdmin();
-  if (!firebaseApp || tokens.length === 0) return;
+  const app = getFirebaseAdmin();
+  if (!app || tokens.length === 0) return;
 
-  const messaging = admin.messaging(firebaseApp);
+  const messaging = admin.messaging(app);
 
   await Promise.allSettled(
     tokens.map((token) =>
