@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
   const questions = await prisma.question.findMany({
     where: {
       isPublic: true,
+      parentQuestionId: null,
       ...(category ? { category } : {}),
     },
     include: {
