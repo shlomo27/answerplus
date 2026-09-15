@@ -47,7 +47,7 @@ workflows:
         - app_store_connect
       vars:
         BUNDLE_ID: "com.aicrowd.app"
-        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
     scripts:
       - name: Install dependencies
@@ -79,7 +79,7 @@ workflows:
       - name: Build iOS IPA
         script: |
           xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
+            --project "$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
 
     artifacts:
