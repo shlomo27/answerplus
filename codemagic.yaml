@@ -6,8 +6,6 @@ workflows:
     environment:
       node: 22
       java: 17
-      groups:
-        - google_play
       vars:
         PACKAGE_NAME: "com.aicrowd.app"
     scripts:
@@ -32,23 +30,8 @@ workflows:
           cd android
           ./gradlew bundleRelease
 
-      - name: Sign AAB
-        script: |
-          jarsigner \
-            -keystore $CM_KEYSTORE_PATH \
-            -storepass $CM_KEYSTORE_PASSWORD \
-            -keypass $CM_KEY_PASSWORD \
-            -signedjar android/app/build/outputs/bundle/release/app-release-signed.aab \
-            android/app/build/outputs/bundle/release/app-release.aab \
-            $CM_KEY_ALIAS
-
     artifacts:
-      - android/app/build/outputs/bundle/release/app-release-signed.aab
-
-    publishing:
-      google_play:
-        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
-        track: internal
+      - android/app/build/outputs/bundle/release/app-release.aab
 
   ios-release:
     name: iOS Release
