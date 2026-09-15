@@ -8,16 +8,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   trustHost: true,
   debug: true,
-  cookies: {
-    pkceCodeVerifier: {
-      name: "__Secure-authjs.pkce.code_verifier",
-      options: { httpOnly: true, sameSite: "none", secure: true, path: "/" },
-    },
-    state: {
-      name: "__Secure-authjs.state",
-      options: { httpOnly: true, sameSite: "none", secure: true, path: "/" },
-    },
-  },
   logger: {
     error(error: Error & { cause?: unknown }) {
       const serialize = (obj: unknown, depth = 0): unknown => {
@@ -52,6 +42,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      checks: [],
     }),
     CredentialsProvider({
       name: "credentials",
