@@ -8,20 +8,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   trustHost: true,
   debug: true,
-  cookies: {
-    pkceCodeVerifier: {
-      name: "next-auth.pkce.code_verifier",
-      options: { httpOnly: true, sameSite: "none", secure: true, path: "/" },
-    },
-    state: {
-      name: "next-auth.state",
-      options: { httpOnly: true, sameSite: "none", secure: true, path: "/" },
-    },
-    sessionToken: {
-      name: "next-auth.session-token",
-      options: { httpOnly: true, sameSite: "lax", secure: true, path: "/" },
-    },
-  },
   logger: {
     error(error: Error & { cause?: unknown }) {
       const serialize = (obj: unknown, depth = 0): unknown => {
