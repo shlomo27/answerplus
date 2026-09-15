@@ -72,7 +72,8 @@ workflows:
           keychain initialize
           app-store-connect fetch-signing-files $BUNDLE_ID \
             --type IOS_APP_STORE \
-            --create
+            --create \
+            --create-certificate
           keychain add-certificates
 
       - name: Build iOS IPA
