@@ -78,6 +78,10 @@ workflows:
           echo $CM_PROVISIONING_PROFILE | base64 --decode > "$PROFILES_HOME/aicrowd.mobileprovision"
           xcode-project use-profiles
 
+      - name: Set build number
+        script: |
+          agvtool new-version -all $BUILD_NUMBER
+
       - name: Build iOS IPA
         script: |
           xcode-project build-ipa \
