@@ -5,9 +5,7 @@ workflows:
     max_build_duration: 60
     environment:
       node: 22
-      java: 17
-      groups:
-        - google_play
+      java: 21
       vars:
         PACKAGE_NAME: "com.aicrowd.app"
     scripts:
@@ -19,6 +17,9 @@ workflows:
           if [ ! -d "android" ]; then
             npx cap add android
           fi
+
+      - name: Create assets directory
+        script: mkdir -p android/app/src/main/assets
 
       - name: Sync Capacitor
         script: npx cap sync android
@@ -32,23 +33,8 @@ workflows:
           cd android
           ./gradlew bundleRelease
 
-      - name: Sign AAB
-        script: |
-          jarsigner \
-            -keystore $CM_KEYSTORE_PATH \
-            -storepass $CM_KEYSTORE_PASSWORD \
-            -keypass $CM_KEY_PASSWORD \
-            -signedjar android/app/build/outputs/bundle/release/app-release-signed.aab \
-            android/app/build/outputs/bundle/release/app-release.aab \
-            $CM_KEY_ALIAS
-
     artifacts:
-      - android/app/build/outputs/bundle/release/app-release-signed.aab
-
-    publishing:
-      google_play:
-        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
-        track: internal
+      - android/app/build/outputs/bundle/release/app-release.aab
 
   ios-release:
     name: iOS Release
@@ -57,12 +43,12 @@ workflows:
     environment:
       node: 22
       xcode: latest
-      cocoapods: default
       groups:
+        - ios_signing
         - app_store_connect
       vars:
         BUNDLE_ID: "com.aicrowd.app"
-        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
     scripts:
       - name: Install dependencies
@@ -79,25 +65,23 @@ workflows:
 
       - name: Add GoogleService-Info.plist
         script: |
+          mkdir -p ios/App/App
           echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/App/App/GoogleService-Info.plist
-
-      - name: Install CocoaPods
-        script: |
-          cd ios/App
-          pod install
 
       - name: Set up code signing
         script: |
           keychain initialize
+          echo $CM_CERTIFICATE | base64 --decode > /tmp/cert.p12
+          keychain add-certificates --certificate /tmp/cert.p12 --certificate-password $CM_CERTIFICATE_PASSWORD
           app-store-connect fetch-signing-files $BUNDLE_ID \
             --type IOS_APP_STORE \
             --create
-          keychain add-certificates
+          xcode-project use-profiles
 
       - name: Build iOS IPA
         script: |
           xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
+            --project "$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
 
     artifacts:
