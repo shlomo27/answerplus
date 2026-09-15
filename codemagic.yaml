@@ -65,12 +65,13 @@ workflows:
 
       - name: Add GoogleService-Info.plist
         script: |
+          mkdir -p ios/App/App
           echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/App/App/GoogleService-Info.plist
 
       - name: Install CocoaPods
         script: |
           cd ios/App
-          pod install
+          pod install --repo-update
 
       - name: Set up code signing
         script: |
