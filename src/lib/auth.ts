@@ -10,11 +10,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: true,
   cookies: {
     pkceCodeVerifier: {
-      name: "__Secure-next-auth.pkce.code_verifier",
+      name: "__Secure-authjs.pkce.code_verifier",
       options: { httpOnly: true, sameSite: "none", secure: true, path: "/" },
     },
     state: {
-      name: "__Secure-next-auth.state",
+      name: "__Secure-authjs.state",
       options: { httpOnly: true, sameSite: "none", secure: true, path: "/" },
     },
   },
