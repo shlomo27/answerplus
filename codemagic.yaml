@@ -80,7 +80,7 @@ workflows:
 
       - name: Set build number
         script: |
-          agvtool new-version -all $BUILD_NUMBER
+          cd ios/App && agvtool new-version -all $BUILD_NUMBER
 
       - name: Build iOS IPA
         script: |
