@@ -43,7 +43,6 @@ workflows:
     environment:
       node: 22
       xcode: latest
-      cocoapods: default
       groups:
         - app_store_connect
       vars:
@@ -67,15 +66,6 @@ workflows:
         script: |
           mkdir -p ios/App/App
           echo $GOOGLESERVICE_INFO_PLIST | base64 --decode > ios/App/App/GoogleService-Info.plist
-
-      - name: Install CocoaPods
-        script: |
-          echo "=== ios/ contents ==="
-          ls -la ios/ || echo "no ios dir"
-          echo "=== ios/App/ contents ==="
-          ls -la ios/App/ || echo "no ios/App dir"
-          cd ios/App
-          pod install --repo-update
 
       - name: Set up code signing
         script: |
