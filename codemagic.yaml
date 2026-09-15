@@ -70,6 +70,10 @@ workflows:
 
       - name: Install CocoaPods
         script: |
+          echo "=== ios/ contents ==="
+          ls -la ios/ || echo "no ios dir"
+          echo "=== ios/App/ contents ==="
+          ls -la ios/App/ || echo "no ios/App dir"
           cd ios/App
           pod install --repo-update
 
