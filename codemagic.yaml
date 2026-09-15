@@ -18,6 +18,9 @@ workflows:
             npx cap add android
           fi
 
+      - name: Create assets directory
+        script: mkdir -p android/app/src/main/assets
+
       - name: Sync Capacitor
         script: npx cap sync android
 
