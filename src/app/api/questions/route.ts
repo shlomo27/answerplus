@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { queryAllProviders } from "@/lib/ai/providers";
 import { generateSummary } from "@/lib/ai/summarize";
 import { categorizeQuestion } from "@/lib/ai/categorize";
+import { moderateContent } from "@/lib/ai/moderate";
 import { auth } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
@@ -47,6 +48,11 @@ export async function POST(req: NextRequest) {
   }
   if (text.trim().length > 2000) {
     return NextResponse.json({ error: "התוכן ארוך מדי (מקסימום 2000 תווים)" }, { status: 400 });
+  }
+
+  const moderation = await moderateContent(text.trim());
+  if (!moderation.allowed) {
+    return NextResponse.json({ error: moderation.reason ?? "התוכן אינו מתאים לפרסום" }, { status: 422 });
   }
 
   if (type === "post") {
