@@ -33,6 +33,7 @@ export default async function FeedPage({
         commentCount: q._count.comments,
         likeCount: q._count.likes,
         imageUrl: q.imageUrl,
+        userId: q.userId,
       }))}
       activeCategory={category}
     />

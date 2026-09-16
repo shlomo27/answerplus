@@ -45,6 +45,9 @@ export async function POST(req: NextRequest) {
   if (!text || typeof text !== "string" || text.trim().length < 5) {
     return NextResponse.json({ error: "התוכן קצר מדי" }, { status: 400 });
   }
+  if (text.trim().length > 2000) {
+    return NextResponse.json({ error: "התוכן ארוך מדי (מקסימום 2000 תווים)" }, { status: 400 });
+  }
 
   if (type === "post") {
     if (!providedCategory) {

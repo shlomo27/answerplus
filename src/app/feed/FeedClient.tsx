@@ -19,6 +19,7 @@ interface Question {
   commentCount: number;
   likeCount?: number;
   imageUrl?: string | null;
+  userId?: string | null;
 }
 
 interface Props {
@@ -126,6 +127,8 @@ export default function FeedClient({ questions, activeCategory }: Props) {
               commentCount={q.commentCount}
               likeCount={q.likeCount}
               imageUrl={q.imageUrl}
+              currentUserId={session?.user?.id}
+              authorUserId={q.userId ?? undefined}
             />
           ))}
         </div>

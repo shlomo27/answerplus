@@ -16,10 +16,13 @@ interface Props {
   commentCount: number;
   likeCount?: number;
   imageUrl?: string | null;
+  currentUserId?: string;
+  authorUserId?: string;
 }
 
 export default function QuestionCard({
   id, text, category, type = "ai_question", authorName, createdAt, conclusion, commentCount, likeCount = 0, imageUrl,
+  currentUserId, authorUserId,
 }: Props) {
   const { lang } = useLangContext();
   const t = getTranslations(lang).components;
@@ -29,12 +32,28 @@ export default function QuestionCard({
   const [liked, setLiked] = useState(false);
   const [localLikeCount, setLocalLikeCount] = useState(likeCount);
   const [liking, setLiking] = useState(false);
+  const [deleted, setDeleted] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const isOwner = !!(currentUserId && authorUserId && currentUserId === authorUserId);
 
   const date = new Date(createdAt).toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
+
+  async function handleDelete(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (deleting || !confirm(lang === "he" ? "למחוק את הפוסט?" : "Delete this post?")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/questions/${id}`, { method: "DELETE" });
+      if (res.ok) setDeleted(true);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   async function handleLike(e: React.MouseEvent) {
     e.preventDefault();
@@ -64,6 +83,8 @@ export default function QuestionCard({
       setLiking(false);
     }
   }
+
+  if (deleted) return null;
 
   return (
     <Link href={`/question/${id}`} className="block group active:scale-[0.99] transition-transform">
@@ -122,6 +143,17 @@ export default function QuestionCard({
               <span>💬</span>
               <span>{commentCount}</span>
             </div>
+            {isOwner && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex items-center gap-1 text-gray-300 hover:text-red-400 transition-colors disabled:opacity-50"
+                aria-label={lang === "he" ? "מחק" : "Delete"}
+              >
+                <span>🗑️</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
