@@ -55,8 +55,9 @@ function LoginForm() {
       const { Capacitor } = await import("@capacitor/core");
       if (Capacitor.isNativePlatform()) {
         const { Browser } = await import("@capacitor/browser");
-        const origin = window.location.origin;
-        await Browser.open({ url: `${origin}/auth/native-google` });
+        const res = await fetch("/api/auth/google-url");
+        const { url } = await res.json();
+        await Browser.open({ url });
         const listener = await Browser.addListener("browserFinished", async () => {
           await listener.remove();
           window.location.href = callbackUrl;
