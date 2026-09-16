@@ -51,6 +51,21 @@ function LoginForm() {
 
   async function handleGoogle() {
     setGoogleLoading(true);
+    try {
+      const { Capacitor } = await import("@capacitor/core");
+      if (Capacitor.isNativePlatform()) {
+        const { Browser } = await import("@capacitor/browser");
+        const origin = window.location.origin;
+        await Browser.open({ url: `${origin}/auth/native-google` });
+        const listener = await Browser.addListener("browserFinished", async () => {
+          await listener.remove();
+          window.location.href = callbackUrl;
+        });
+        return;
+      }
+    } catch {
+      // not in Capacitor, fall through to web sign-in
+    }
     await signIn("google", { callbackUrl });
   }
 

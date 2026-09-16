@@ -16,6 +16,7 @@
     "@anthropic-ai/sdk": "^0.39.0",
     "@auth/prisma-adapter": "^2.11.2",
     "@capacitor/android": "^8.3.4",
+    "@capacitor/browser": "^8.0.4",
     "@capacitor/cli": "^8.3.4",
     "@capacitor/core": "^8.3.4",
     "@capacitor/ios": "^8.3.4",
